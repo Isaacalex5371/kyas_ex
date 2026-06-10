@@ -1,0 +1,43 @@
+C:\Users\isaac\TmsCore\bin\Debug\net10.0\TmsCore.exe
+C:\Users\isaac\TmsCore\bin\Debug\net10.0\TmsCore.deps.json
+C:\Users\isaac\TmsCore\bin\Debug\net10.0\TmsCore.runtimeconfig.json
+C:\Users\isaac\TmsCore\bin\Debug\net10.0\TmsCore.dll
+C:\Users\isaac\TmsCore\bin\Debug\net10.0\TmsCore.pdb
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.AssemblyInfoInputs.cache
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.AssemblyInfo.cs
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.csproj.CoreCompileInputs.cache
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.dll
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\refint\TmsCore.dll
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.pdb
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\TmsCore.genruntimeconfig.cache
+C:\Users\isaac\TmsCore\obj\Debug\net10.0\ref\TmsCore.dll
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.GeneratedMSBuildEditorConfig.editorconfig
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.AssemblyInfoInputs.cache
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.AssemblyInfo.cs
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.csproj.CoreCompileInputs.cache
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.dll
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\refint\TmsCore.dll
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.pdb
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\bin\Debug\net10.0\TmsCore.exe
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\bin\Debug\net10.0\TmsCore.deps.json
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\bin\Debug\net10.0\TmsCore.runtimeconfig.json
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\bin\Debug\net10.0\TmsCore.dll
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\bin\Debug\net10.0\TmsCore.pdb
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\TmsCore.genruntimeconfig.cache
+D:\isaac\educational purpose only\kyas\week 1\TmsCore\obj\Debug\net10.0\ref\TmsCore.dll
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\bin\Debug\net10.0\TmsCore.exe
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\bin\Debug\net10.0\TmsCore.deps.json
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\bin\Debug\net10.0\TmsCore.runtimeconfig.json
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\bin\Debug\net10.0\TmsCore.dll
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\bin\Debug\net10.0\TmsCore.pdb
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.GeneratedMSBuildEditorConfig.editorconfig
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.AssemblyInfoInputs.cache
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.AssemblyInfo.cs
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.csproj.CoreCompileInputs.cache
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.sourcelink.json
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.dll
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\refint\TmsCore.dll
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.pdb
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\TmsCore.genruntimeconfig.cache
+D:\isaac\educational purpose only\kyas\exerscise\w-1\TmsCore\obj\Debug\net10.0\ref\TmsCore.dll
