@@ -1,119 +1,157 @@
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using TmsApi.Data;
+using TmsApi.Entities;
 
-public record EnrollmentRecord(string Id, string StudentId, string CourseCode, DateTime EnrolledAt);
+public record EnrollmentRecord(
+    int Id,
+    int StudentId,
+    int CourseId,
+    DateTime EnrolledAt
+);
 
 public interface IEnrollmentService
 {
-    Task<EnrollmentRecord> EnrollAsync(string studentId, string courseCode);
-    Task<EnrollmentRecord?> GetByIdAsync(string id);
+    Task<EnrollmentRecord> EnrollAsync(int studentId, int courseId);
+    Task<EnrollmentRecord?> GetByIdAsync(int id);
     Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync();
-    Task<bool> DeleteAsync(string id);
+    Task<bool> DeleteAsync(int id);
 }
 
 public class EnrollmentService : IEnrollmentService
 {
-    public static readonly Dictionary<string, EnrollmentRecord> _store = new();
+    private readonly TmsDbContext _context;
     private readonly ILogger<EnrollmentService> _logger;
 
-    public EnrollmentService(ILogger<EnrollmentService> logger)
+    public EnrollmentService(
+        TmsDbContext context,
+        ILogger<EnrollmentService> logger)
     {
+        _context = context;
         _logger = logger;
     }
 
-    public async Task<EnrollmentRecord> EnrollAsync(string studentId, string courseCode)
+    public async Task<EnrollmentRecord> EnrollAsync(
+        int studentId,
+        int courseId)
     {
-        // student exists
-        if (!StudentService._store.ContainsKey(studentId))
+        // Student exists
+        var student = await _context.Students
+            .FirstOrDefaultAsync(s => s.Id == studentId);
+
+        if (student is null)
         {
-            throw new ArgumentException($"Student {studentId} does not exist.");
+            throw new ArgumentException(
+                $"Student {studentId} does not exist.");
         }
 
-        // course exists
-        if (!CourseService._store.ContainsKey(courseCode))
+        // Course exists
+        var course = await _context.Courses
+            .Include(c => c.Enrollments)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
+
+        if (course is null)
         {
-            throw new ArgumentException($"Course {courseCode} does not exist.");
+            throw new ArgumentException(
+                $"Course {courseId} does not exist.");
         }
-        var existing = _store.Values.FirstOrDefault(e =>
-            e.StudentId == studentId && e.CourseCode == courseCode
-        );
+
+        // Duplicate enrollment check
+        var existing = await _context.Enrollments
+            .FirstOrDefaultAsync(e =>
+                e.StudentId == studentId &&
+                e.CourseId == courseId);
 
         if (existing is not null)
         {
             _logger.LogWarning(
-                "Duplicate enrollment attempt {StudentId} already in {CourseCode} (record {EnrollmentId})",
+                "Duplicate enrollment attempt Student {StudentId} Course {CourseId}",
                 studentId,
-                courseCode,
-                existing.Id
-            );
-            return existing;
-        }
-        // capacity check
-        var course = CourseService._store[courseCode];
+                courseId);
 
-        if (course.EnrolledCount >= course.Capacity)
-        {
-            throw new ArgumentException($"Course {courseCode} is full.");
+            return new EnrollmentRecord(
+                existing.Id,
+                existing.StudentId,
+                existing.CourseId,
+                DateTime.UtcNow);
         }
 
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var record = new EnrollmentRecord(id, studentId, courseCode, DateTime.UtcNow);
-        _store[id] = record;
-
-        // increment enrolled count
-        CourseService._store[courseCode] = course with
+        // Capacity check
+        if (course.Enrollments.Count >= course.Capacity)
         {
-            EnrolledCount = course.EnrolledCount + 1,
+            throw new ArgumentException(
+                $"Course {course.Title} is full.");
+        }
+
+        var enrollment = new Enrollment
+        {
+            StudentId = studentId,
+            CourseId = courseId,
+            Grade = 0m
         };
 
-        _logger.LogInformation(
-            "Enrolled {StudentId} in {CourseCode} record {EnrollmentId}",
-            studentId,
-            courseCode,
-            id
-        );
+        _context.Enrollments.Add(enrollment);
 
-        return record;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Enrolled Student {StudentId} in Course {CourseId}",
+            studentId,
+            courseId);
+
+        return new EnrollmentRecord(
+            enrollment.Id,
+            enrollment.StudentId,
+            enrollment.CourseId,
+            DateTime.UtcNow);
     }
 
-    public async Task<EnrollmentRecord?> GetByIdAsync(string id)
+    public async Task<EnrollmentRecord?> GetByIdAsync(int id)
     {
-        if (!_store.TryGetValue(id, out var record))
+        var enrollment = await _context.Enrollments
+            .FirstOrDefaultAsync(e => e.Id == id);
+
+        if (enrollment is null)
         {
-            _logger.LogWarning("Enrollment {EnrollmentId} not found", id);
             return null;
         }
-        return record;
+
+        return new EnrollmentRecord(
+            enrollment.Id,
+            enrollment.StudentId,
+            enrollment.CourseId,
+            DateTime.UtcNow);
     }
 
     public async Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync()
     {
-        return _store.Values.ToList();
+        return await _context.Enrollments
+            .Select(e => new EnrollmentRecord(
+                e.Id,
+                e.StudentId,
+                e.CourseId,
+                DateTime.UtcNow))
+            .ToListAsync();
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        if (!_store.TryGetValue(id, out var enrollment))
-        {
-            _logger.LogWarning("Delete failed enrollment {EnrollmentId} not found", id);
+        var enrollment = await _context.Enrollments
+            .FirstOrDefaultAsync(e => e.Id == id);
 
+        if (enrollment is null)
+        {
             return false;
         }
 
-        _store.Remove(id);
+        _context.Enrollments.Remove(enrollment);
 
-        if (CourseService._store.TryGetValue(enrollment.CourseCode, out var course))
-        {
-            CourseService._store[enrollment.CourseCode] = course with
-            {
-                EnrolledCount = course.EnrolledCount - 1,
-            };
-        }
+        await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Deleted enrollment {EnrollmentId}", id);
+        _logger.LogInformation(
+            "Deleted enrollment {EnrollmentId}",
+            id);
 
         return true;
-}
-public class TmsDatabaseException(string message) : Exception(message);
     }
+}
 

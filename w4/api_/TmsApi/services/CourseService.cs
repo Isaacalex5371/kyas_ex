@@ -1,7 +1,14 @@
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using TmsApi.Data;
+using TmsApi.Entities;
 
-public record CourseRecord(string Code, string Title, int Capacity, int EnrolledCount);
+public record CourseRecord(
+    int Id,
+    string Code,
+    string Title,
+    int Capacity,
+    int EnrolledCount
+);
 
 public interface ICourseService
 {
@@ -13,16 +20,21 @@ public interface ICourseService
 
 public class CourseService : ICourseService
 {
-    public static readonly Dictionary<string, CourseRecord> _store = new();
-
+    private readonly TmsDbContext _context;
     private readonly ILogger<CourseService> _logger;
 
-    public CourseService(ILogger<CourseService> logger)
+    public CourseService(
+        TmsDbContext context,
+        ILogger<CourseService> logger)
     {
+        _context = context;
         _logger = logger;
     }
 
-    public async Task<CourseRecord> CreateAsync(string code, string title, int capacity)
+    public async Task<CourseRecord> CreateAsync(
+        string code,
+        string title,
+        int capacity)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new ArgumentException("Course code is required.");
@@ -33,56 +45,107 @@ public class CourseService : ICourseService
         if (capacity <= 0)
             throw new ArgumentException("Capacity must be greater than 0.");
 
-        if (_store.ContainsKey(code))
+        var exists = await _context.Courses
+            .AnyAsync(c => c.Code == code);
+
+        if (exists)
             throw new ArgumentException($"Course {code} already exists.");
 
-        var record = new CourseRecord(code, title, capacity, 0);
+        var course = new Course
+        {
+            Code = code,
+            Title = title,
+            Capacity = capacity
+        };
 
-        _store[code] = record;
+        _context.Courses.Add(course);
 
-        _logger.LogInformation("Created course {CourseCode} with title {CourseTitle}", code, title);
+        await _context.SaveChangesAsync();
 
-        return record;
+        _logger.LogInformation(
+            "Created course {CourseCode} with title {CourseTitle}",
+            code,
+            title);
+
+        return new CourseRecord(
+            course.Id,
+            course.Code,
+            course.Title,
+            course.Capacity,
+            0
+        );
     }
 
     public async Task<CourseRecord?> GetByCodeAsync(string code)
     {
-        if (!_store.TryGetValue(code, out var record))
+        var course = await _context.Courses
+            .Include(c => c.Enrollments)
+            .FirstOrDefaultAsync(c => c.Code == code);
+
+        if (course is null)
         {
-            _logger.LogWarning("Course {CourseCode} not found", code);
+            _logger.LogWarning(
+                "Course {CourseCode} not found",
+                code);
 
             return null;
         }
 
-        return record;
+        return new CourseRecord(
+            course.Id,
+            course.Code,
+            course.Title,
+            course.Capacity,
+            course.Enrollments.Count
+        );
     }
 
     public async Task<IReadOnlyList<CourseRecord>> GetAllAsync()
     {
-        return _store.Values.ToList();
+        return await _context.Courses
+            .Include(c => c.Enrollments)
+            .Select(c => new CourseRecord(
+                c.Id,
+                c.Code,
+                c.Title,
+                c.Capacity,
+                c.Enrollments.Count
+            ))
+            .ToListAsync();
     }
 
     public async Task<bool> DeleteAsync(string code)
     {
-        var hasEnrollment = EnrollmentService._store.Values.Any(e => e.CourseCode == code);
+        var course = await _context.Courses
+            .Include(c => c.Enrollments)
+            .FirstOrDefaultAsync(c => c.Code == code);
 
-        if (hasEnrollment)
+        if (course is null)
         {
-            _logger.LogWarning("Cannot delete course {CourseCode}, active enrollments exist", code);
+            _logger.LogWarning(
+                "Delete failed: course {CourseCode} not found",
+                code);
 
             return false;
         }
-        var removed = _store.Remove(code);
 
-        if (removed)
+        if (course.Enrollments.Any())
         {
-            _logger.LogInformation("Deleted course {CourseCode}", code);
-        }
-        else
-        {
-            _logger.LogWarning("Delete failed: course {CourseCode} not found", code);
+            _logger.LogWarning(
+                "Cannot delete course {CourseCode}, active enrollments exist",
+                code);
+
+            return false;
         }
 
-        return removed;
+        _context.Courses.Remove(course);
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Deleted course {CourseCode}",
+            code);
+
+        return true;
     }
 }
