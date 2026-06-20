@@ -14,30 +14,43 @@ public class EnrollmentsController(IEnrollmentService enrollmentService) : Contr
 
     // GET /api/enrollments/{id}
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    public async Task<IActionResult> GetById(int id)
     {
         var record = await enrollmentService.GetByIdAsync(id);
-        return record is not null ? Ok(record) : NotFound();
+
+        return record is not null
+            ? Ok(record)
+            : NotFound();
     }
 
     // POST /api/enrollments
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateEnrollmentRequest request)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateEnrollmentRequest request)
     {
-        var record = await enrollmentService.EnrollAsync(request.StudentId, request.CourseCode);
+        var record = await enrollmentService.EnrollAsync(
+            request.StudentId,
+            request.CourseId);
 
-        // Returns 201 Created with Location header pointing to GetById
-        return CreatedAtAction(nameof(GetById), new { id = record.Id }, record);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = record.Id },
+            record);
     }
 
     // DELETE /api/enrollments/{id}
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    public async Task<IActionResult> Delete(int id)
     {
         var deleted = await enrollmentService.DeleteAsync(id);
-        return deleted ? NoContent() : NotFound(); // 204 NoContent on success
+
+        return deleted
+            ? NoContent()
+            : NotFound();
     }
 }
 
 // Request Model
-public record CreateEnrollmentRequest(string StudentId, string CourseCode);
+public record CreateEnrollmentRequest(
+    int StudentId,
+    int CourseId);

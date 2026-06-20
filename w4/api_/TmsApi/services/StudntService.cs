@@ -1,77 +1,75 @@
-using System.Collections.Generic;
-using System.Linq;
-
-public record StudentRecord(string Id, string Name, int Age, decimal GPA);
+using Microsoft.EntityFrameworkCore;
+using TmsApi.Data;
+using TmsApi.Entities;
 
 public interface IStudentService
 {
-    Task<StudentRecord> RegisterAsync(string name, int age, decimal GPA);
-    Task<StudentRecord?> GetByIdAsync(string id);
-    Task<IReadOnlyList<StudentRecord>> GetAllAsync();
-    Task<bool> DeleteAsync(string id);
+    Task<Student> RegisterAsync(string name, decimal gpa);
+    Task<Student?> GetByIdAsync(int id);
+    Task<IReadOnlyList<Student>> GetAllAsync();
+    Task<bool> DeleteAsync(int id);
 }
 
 public class StudentService : IStudentService
 {
-    public static readonly Dictionary<string, StudentRecord> _store = new();
+    private readonly TmsDbContext _context;
     private readonly ILogger<StudentService> _logger;
 
-    public StudentService(ILogger<StudentService> logger)
+    public StudentService(
+        TmsDbContext context,
+        ILogger<StudentService> logger)
     {
+        _context = context;
         _logger = logger;
     }
 
-    public async Task<StudentRecord> RegisterAsync(string name, int age, decimal GPA)
+    public async Task<Student> RegisterAsync(
+        string name,
+        decimal gpa)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Student name is required.");
-
-        var id = Guid.NewGuid().ToString("N")[..8];
-
-        var record = new StudentRecord(id, name, age, GPA);
-
-        _store[id] = record;
-
-        _logger.LogInformation("Registered {name} in record, with ID: {studentId}", name, id);
-
-        return record;
-    }
-
-    public async Task<StudentRecord?> GetByIdAsync(string id)
-    {
-        if (!_store.TryGetValue(id, out var record))
+        var student = new Student
         {
-            _logger.LogWarning("Student with ID {studentID} not found", id);
-            return null;
-        }
+            RegistrationNumber = $"TMS-{DateTime.UtcNow:yyyy}-{Guid.NewGuid().ToString("N")[..4]}",
+            Name = name,
+            GPA = gpa,
+            IsActive = true
+        };
 
-        return record;
+        _context.Students.Add(student);
+
+        await _context.SaveChangesAsync();
+
+        return student;
     }
 
-    public async Task<IReadOnlyList<StudentRecord>> GetAllAsync()
+    public async Task<Student?> GetByIdAsync(int id)
     {
-        return _store.Values.ToList();
+        return await _context.Students
+            .FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<IReadOnlyList<Student>> GetAllAsync()
     {
-        var hasEnrollment = EnrollmentService._store.Values.Any(e => e.StudentId == id);
+        return await _context.Students
+            .ToListAsync();
+    }
 
-        if (hasEnrollment)
-        {
-            _logger.LogWarning("Cannot delete student {studentId}, active enrollments exist", id);
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var student = await _context.Students
+            .Include(s => s.Enrollments)
+            .FirstOrDefaultAsync(s => s.Id == id);
 
+        if (student == null)
             return false;
-        }
-        var removed = _store.Remove(id);
-        if (removed)
-        {
-            _logger.LogInformation("Deleted Student {studentId}", id);
-        }
-        else
-        {
-            _logger.LogWarning("Delete Failed: student with ID: {studenId} not found", id);
-        }
-        return removed;
+
+        if (student.Enrollments.Any())
+            return false;
+
+        _context.Students.Remove(student);
+
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }
