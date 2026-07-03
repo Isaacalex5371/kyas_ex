@@ -1,22 +1,22 @@
+using TmsApi.Services;
 public class EnrollmentWorker
 {
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public EnrollmentWorker(
-        IServiceScopeFactory scopeFactory)
+    public EnrollmentWorker(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
     }
 
     public void ProcessBatch()
     {
-        using var scope =
-            _scopeFactory.CreateScope();
+        // Create a short-lived scope manually
+        using var scope = _scopeFactory.CreateScope();
 
-        var service =
-            scope.ServiceProvider
-            .GetRequiredService<IEnrollmentService>();
+        // Resolve the scoped service from the new scope's provider
+        var svc = scope.ServiceProvider.GetRequiredService<IEnrollmentService>();
 
-        // use service here
+        // Use the service... (Simulation)
+        Console.WriteLine("Worker successfully processed batch using scoped service.");
     }
 }
