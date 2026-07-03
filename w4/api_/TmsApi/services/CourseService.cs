@@ -1,151 +1,233 @@
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore; // For ToListAsync, FirstOrDefaultAsync, Include, AnyAsync, etc.
 using TmsApi.Data;
-using TmsApi.Entities;
+using TmsApi.DTOs;
+using TmsApi.Entities; // For the actual database entities
 
-public record CourseRecord(
-    int Id,
-    string Code,
-    string Title,
-    int Capacity,
-    int EnrolledCount
-);
+namespace TmsApi.Services;
 
 public interface ICourseService
 {
-    Task<CourseRecord> CreateAsync(string code, string title, int capacity);
+    Task<CourseResponseDto> CreateAsync(CreateCourseRequest course, CancellationToken ct);
     Task<CourseRecord?> GetByCodeAsync(string code);
     Task<IReadOnlyList<CourseRecord>> GetAllAsync();
     Task<bool> DeleteAsync(string code);
+
+    Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct);
+    Task<bool> CodeExistsAsync(string code, CancellationToken ct);
+
+    Task<IReadOnlyList<TopCourseSummaryRecord>> GetTopCoursesByEnrollmentAsync(int topCount);
 }
 
 public class CourseService : ICourseService
 {
-    private readonly TmsDbContext _context;
     private readonly ILogger<CourseService> _logger;
+    private readonly TmsDbContext _context;
 
-    public CourseService(
-        TmsDbContext context,
-        ILogger<CourseService> logger)
+    public CourseService(ILogger<CourseService> logger, TmsDbContext context) // Inject TmsDbContext
     {
-        _context = context;
         _logger = logger;
+        _context = context;
     }
 
-    public async Task<CourseRecord> CreateAsync(
-        string code,
-        string title,
-        int capacity)
+    // Helper method to map a Course entity to a CourseRecord DTO
+    // includes calculating EnrolledCount from the database
+    private CourseRecord MapToCourseRecord(Course course)
     {
-        if (string.IsNullOrWhiteSpace(code))
-            throw new ArgumentException("Course code is required.");
+        int enrolledCount = course.Enrollments?.Count ?? 0; // Safely get count if loaded
 
-        if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Course title is required.");
+        return new CourseRecord(
+            Code: course.Code,
+            Title: course.Title,
+            Capacity: course.Capacity,
+            EnrolledCount: enrolledCount
+        );
+    }
 
-        if (capacity <= 0)
-            throw new ArgumentException("Capacity must be greater than 0.");
+    // public async Task<CourseRecord> CreateAsync(string code, string title, int capacity)
+    // {
+    //     if (string.IsNullOrWhiteSpace(code))
+    //         throw new ArgumentException("Course code is required.", nameof(code));
+    //     if (string.IsNullOrWhiteSpace(title))
+    //         throw new ArgumentException("Course title is required.", nameof(title));
+    //     if (capacity <= 0)
+    //         throw new ArgumentException("Capacity must be greater than 0.", nameof(capacity));
 
-        var exists = await _context.Courses
-            .AnyAsync(c => c.Code == code);
+    //     // Check if a course with this code already exists in the database
+    //     var existingCourse = await _context.Courses.FirstOrDefaultAsync(c => c.Code == code);
+    //     if (existingCourse != null)
+    //     {
+    //         throw new ArgumentException($"Course {code} already exists.");
+    //     }
 
-        if (exists)
-            throw new ArgumentException($"Course {code} already exists.");
+    //     // Create a new Course entity
+    //     var courseEntity = new Course
+    //     {
+    //         Code = code.ToUpper(),
+    //         Title = title,
+    //         Capacity = capacity,
+    //         // Enrollments, Assessments, Certificates collections are initialized by default
+    //     };
 
+    //     _context.Courses.Add(courseEntity); // Stage for insertion
+    //     await _context.SaveChangesAsync(); // Commit to the database (Id is now populated)
+
+    //     _logger.LogInformation(
+    //         "Created course {CourseCode} with title {CourseTitle}",
+    //         courseEntity.Code,
+    //         courseEntity.Title
+    //     );
+
+    //     // Map the created entity to the DTO before returning (EnrolledCount is 0 for a new course)
+    //     return MapToCourseRecord(courseEntity);
+    // }
+
+    public async Task<CourseResponseDto> CreateAsync(
+        CreateCourseRequest request,
+        CancellationToken ct
+    )
+    {
         var course = new Course
         {
-            Code = code,
-            Title = title,
-            Capacity = capacity
+            Code = request.Code,
+            Title = request.Title,
+            Capacity = request.Capacity,
         };
 
         _context.Courses.Add(course);
+        await _context.SaveChangesAsync(ct);
 
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation(
-            "Created course {CourseCode} with title {CourseTitle}",
-            code,
-            title);
-
-        return new CourseRecord(
-            course.Id,
-            course.Code,
-            course.Title,
-            course.Capacity,
-            0
-        );
+        // Re-query to get the full DTO shape
+        return (await GetByIdAsync(course.Id, ct))!;
     }
 
-    public async Task<CourseRecord?> GetByCodeAsync(string code)
+    public async Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct)
     {
-        var course = await _context.Courses
-            .Include(c => c.Enrollments)
-            .FirstOrDefaultAsync(c => c.Code == code);
-
-        if (course is null)
-        {
-            _logger.LogWarning(
-                "Course {CourseCode} not found",
-                code);
-
-            return null;
-        }
-
-        return new CourseRecord(
-            course.Id,
-            course.Code,
-            course.Title,
-            course.Capacity,
-            course.Enrollments.Count
-        );
-    }
-
-    public async Task<IReadOnlyList<CourseRecord>> GetAllAsync()
-    {
-        return await _context.Courses
-            .Include(c => c.Enrollments)
-            .Select(c => new CourseRecord(
+        return await _context
+            .Courses.AsNoTracking()
+            .Where(c => c.Id == id)
+            .Select(c => new CourseResponseDto(
                 c.Id,
                 c.Code,
                 c.Title,
                 c.Capacity,
                 c.Enrollments.Count
             ))
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<CourseRecord?> GetByCodeAsync(string code)
+    {
+        // Query the database, including Enrollments to calculate EnrolledCount
+        var courseEntity = await _context
+            .Courses.Include(c => c.Enrollments)
+            .FirstOrDefaultAsync(c => c.Code == code);
+
+        if (courseEntity == null)
+        {
+            _logger.LogWarning("Course {CourseCode} not found.", code);
+            return null;
+        }
+
+        // Map the found entity to the DTO
+        return MapToCourseRecord(courseEntity);
+    }
+
+    public async Task<IReadOnlyList<CourseRecord>> GetAllAsync()
+    {
+        // Query the database, including Enrollments for each course
+        var courseEntities = await _context
+            .Courses.Include(c => c.Enrollments) // Eagerly load enrollments
             .ToListAsync();
+
+        // Map the list of entities to a list of DTOs
+        var courseRecords = courseEntities.Select(MapToCourseRecord).ToList();
+
+        return courseRecords.AsReadOnly(); // Return as IReadOnlyList for immutability
     }
 
     public async Task<bool> DeleteAsync(string code)
     {
-        var course = await _context.Courses
-            .Include(c => c.Enrollments)
-            .FirstOrDefaultAsync(c => c.Code == code);
+        // Find the course entity first
+        var courseToDelete = await _context.Courses.FirstOrDefaultAsync(c => c.Code == code);
 
-        if (course is null)
+        if (courseToDelete == null)
         {
-            _logger.LogWarning(
-                "Delete failed: course {CourseCode} not found",
-                code);
-
+            _logger.LogWarning("Delete failed: course {CourseCode} not found.", code);
             return false;
         }
 
-        if (course.Enrollments.Any())
+        // Check for existing enrollments for this course using the DbContext
+        var hasEnrollment = await _context.Enrollments.AnyAsync(e =>
+            e.CourseId == courseToDelete.Id
+        );
+
+        if (hasEnrollment)
         {
             _logger.LogWarning(
-                "Cannot delete course {CourseCode}, active enrollments exist",
-                code);
-
+                "Cannot delete course {CourseCode}: active enrollments exist.",
+                code
+            );
             return false;
         }
 
-        _context.Courses.Remove(course);
+        // Check for existing assessments for this course using the DbContext
+        var hasAssessments = await _context.Assessments.AnyAsync(a =>
+            a.CourseId == courseToDelete.Id
+        );
 
-        await _context.SaveChangesAsync();
+        if (hasAssessments)
+        {
+            _logger.LogWarning(
+                "Cannot delete course {CourseCode}: existing assessments are tied to it.",
+                code
+            );
+            return false;
+        }
 
-        _logger.LogInformation(
-            "Deleted course {CourseCode}",
-            code);
+        // Check for existing certificates for this course using the DbContext
+        var hasCertificates = await _context.Certificates.AnyAsync(cert =>
+            cert.CourseId == courseToDelete.Id
+        );
 
+        if (hasCertificates)
+        {
+            _logger.LogWarning(
+                "Cannot delete course {CourseCode}: existing certificates are tied to it.",
+                code
+            );
+            return false;
+        }
+
+        _context.Courses.Remove(courseToDelete); // Stage for deletion
+        await _context.SaveChangesAsync(); // Commit deletion to the database
+
+        _logger.LogInformation("Deleted course {CourseCode}", code);
         return true;
     }
+
+    public async Task<IReadOnlyList<TopCourseSummaryRecord>> GetTopCoursesByEnrollmentAsync(
+        int topCount
+    )
+    {
+        if (topCount < 1)
+            topCount = 5;
+        var topCourses = await _context
+            .Courses.Include(c => c.Enrollments)
+            .OrderByDescending(x => x.Enrollments.Count)
+            .Select(c => new TopCourseSummaryRecord(
+                CourseCode: c.Code,
+                CourseTitle: c.Title,
+                EnrollmentCount: c.Enrollments.Count
+            ))
+            //.OrderByDescending(x => x.EnrollmentCount)
+            .Take(topCount)
+            .ToListAsync();
+
+        return topCourses.AsReadOnly();
+    }
+
+    public async Task<bool> CodeExistsAsync(string code, CancellationToken ct) =>
+        await _context.Courses.AsNoTracking().AnyAsync(c => c.Code == code, ct);
 }

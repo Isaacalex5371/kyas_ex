@@ -1,157 +1,110 @@
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore; // For ToListAsync, FirstOrDefaultAsync, Include, AnyAsync, etc.
 using TmsApi.Data;
+using TmsApi.DTOs;
 using TmsApi.Entities;
 
-public record EnrollmentRecord(
-    int Id,
-    int StudentId,
-    int CourseId,
-    DateTime EnrolledAt
-);
+namespace TmsApi.Services;
 
 public interface IEnrollmentService
 {
-    Task<EnrollmentRecord> EnrollAsync(int studentId, int courseId);
-    Task<EnrollmentRecord?> GetByIdAsync(int id);
+    Task<EnrollmentResponseDto> CreateAsync(
+        int courseId,
+        EnrollStudentRequest request,
+        CancellationToken ct
+    );
+    Task<EnrollmentResponseDto?> GetByIdAsync(int courseId, int id, CancellationToken ct);
     Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync();
     Task<bool> DeleteAsync(int id);
 }
 
-public class EnrollmentService : IEnrollmentService
+public class EnrollmentService(TmsDbContext _context, ILogger<EnrollmentService> _logger)
+    : IEnrollmentService
 {
-    private readonly TmsDbContext _context;
-    private readonly ILogger<EnrollmentService> _logger;
-
-    public EnrollmentService(
-        TmsDbContext context,
-        ILogger<EnrollmentService> logger)
+    // Helper method to map an Enrollment entity to an EnrollmentRecord DTO
+    private EnrollmentRecord MapToEnrollmentRecord(Enrollment enrollment)
     {
-        _context = context;
-        _logger = logger;
+        string studentRegNumber = enrollment.Student?.RegistrationNumber ?? "UNKNOWN";
+        string courseCode = enrollment.Course?.Code ?? "UNKNOWN";
+
+        return new EnrollmentRecord(
+            Id: enrollment.Id,
+            StudentId: studentRegNumber,
+            CourseCode: courseCode,
+            Grade: enrollment.Grade,
+            EnrolledAt: enrollment.EnrolledAt
+        );
     }
 
-    public async Task<EnrollmentRecord> EnrollAsync(
-        int studentId,
-        int courseId)
+    public async Task<EnrollmentResponseDto> CreateAsync(
+        int courseId,
+        EnrollStudentRequest request,
+        CancellationToken ct
+    )
     {
-        // Student exists
-        var student = await _context.Students
-            .FirstOrDefaultAsync(s => s.Id == studentId);
-
-        if (student is null)
-        {
-            throw new ArgumentException(
-                $"Student {studentId} does not exist.");
-        }
-
-        // Course exists
-        var course = await _context.Courses
-            .Include(c => c.Enrollments)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
-
-        if (course is null)
-        {
-            throw new ArgumentException(
-                $"Course {courseId} does not exist.");
-        }
-
-        // Duplicate enrollment check
-        var existing = await _context.Enrollments
-            .FirstOrDefaultAsync(e =>
-                e.StudentId == studentId &&
-                e.CourseId == courseId);
-
-        if (existing is not null)
-        {
-            _logger.LogWarning(
-                "Duplicate enrollment attempt Student {StudentId} Course {CourseId}",
-                studentId,
-                courseId);
-
-            return new EnrollmentRecord(
-                existing.Id,
-                existing.StudentId,
-                existing.CourseId,
-                DateTime.UtcNow);
-        }
-
-        // Capacity check
-        if (course.Enrollments.Count >= course.Capacity)
-        {
-            throw new ArgumentException(
-                $"Course {course.Title} is full.");
-        }
-
+        // TODO 2: Insert, Save, Re-read
         var enrollment = new Enrollment
         {
-            StudentId = studentId,
             CourseId = courseId,
-            Grade = 0m
+            StudentId = request.StudentId,
+            EnrolledAt = DateTime.UtcNow,
         };
 
         _context.Enrollments.Add(enrollment);
-
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
 
         _logger.LogInformation(
-            "Enrolled Student {StudentId} in Course {CourseId}",
-            studentId,
-            courseId);
+            "Enrolled student {StudentId} in course {CourseId}",
+            request.StudentId,
+            courseId
+        );
 
-        return new EnrollmentRecord(
-            enrollment.Id,
-            enrollment.StudentId,
-            enrollment.CourseId,
-            DateTime.UtcNow);
+        return (await GetByIdAsync(courseId, enrollment.Id, ct))!;
     }
 
-    public async Task<EnrollmentRecord?> GetByIdAsync(int id)
+    public async Task<EnrollmentResponseDto?> GetByIdAsync(
+        int courseId,
+        int id,
+        CancellationToken ct
+    )
     {
-        var enrollment = await _context.Enrollments
-            .FirstOrDefaultAsync(e => e.Id == id);
-
-        if (enrollment is null)
-        {
-            return null;
-        }
-
-        return new EnrollmentRecord(
-            enrollment.Id,
-            enrollment.StudentId,
-            enrollment.CourseId,
-            DateTime.UtcNow);
+        return await _context
+            .Enrollments.AsNoTracking()
+            .Where(e => e.Id == id && e.CourseId == courseId)
+            .Select(e => new EnrollmentResponseDto(e.Id, e.CourseId, e.StudentId, e.EnrolledAt))
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync()
     {
-        return await _context.Enrollments
-            .Select(e => new EnrollmentRecord(
-                e.Id,
-                e.StudentId,
-                e.CourseId,
-                DateTime.UtcNow))
+        var enrollmentEntities = await _context
+            .Enrollments.Include(e => e.Student)
+            .Include(e => e.Course)
             .ToListAsync();
+
+        var enrollmentRecords = enrollmentEntities.Select(MapToEnrollmentRecord).ToList();
+
+        return enrollmentRecords.AsReadOnly();
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var enrollment = await _context.Enrollments
-            .FirstOrDefaultAsync(e => e.Id == id);
+        var enrollmentToDelete = await _context.Enrollments.FirstOrDefaultAsync(e => e.Id == id);
 
-        if (enrollment is null)
+        if (enrollmentToDelete == null)
         {
+            _logger.LogWarning("Delete failed: Enrollment with ID '{EnrollmentId}' not found.", id);
             return false;
         }
 
-        _context.Enrollments.Remove(enrollment);
+        _context.Enrollments.Remove(enrollmentToDelete); // Stage for deletion
+        await _context.SaveChangesAsync(); // Commit deletion to the database
 
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation(
-            "Deleted enrollment {EnrollmentId}",
-            id);
+        _logger.LogInformation("Deleted enrollment {EnrollmentId}", id);
 
         return true;
     }
 }
 
+public class TmsDatabaseException(string message) : Exception(message);
