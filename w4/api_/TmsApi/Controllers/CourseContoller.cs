@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TmsApi.Dtos;
 using TmsApi.DTOs;
 using TmsApi.Services; // For ICourseService
 
@@ -9,13 +10,15 @@ namespace TmsApi.Controllers;
 public class CoursesController(ICourseService _courseService) : ControllerBase
 {
     // GET /api/courses
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var courses = await _courseService.GetAllAsync();
-        return Ok(courses); // Returns 200 OK with list of CourseRecord DTOs
-    }
+       [HttpGet]
+public async Task<IActionResult> GetCourses(
+    [FromQuery] PagedRequest request,
+    CancellationToken ct)
+{
+    var result = await _courseService.GetCoursesAsync(request, ct);
 
+    return Ok(result);
+}
     // GET /api/courses/{code}
     [HttpGet("{code}")]
     public async Task<IActionResult> GetByCode(string code)
@@ -23,6 +26,7 @@ public class CoursesController(ICourseService _courseService) : ControllerBase
         var record = await _courseService.GetByCodeAsync(code);
         return record is not null ? Ok(record) : NotFound(); // Returns 200 OK or 404 Not Found
     }
+
 
     [HttpGet("{id:int}", Name = nameof(GetCourseById))]
     public async Task<IActionResult> GetCourseById(int id, CancellationToken ct)
