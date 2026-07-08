@@ -4,15 +4,30 @@ using Tms.Api.Dtos;
 using TmsApi.Dtos;
 using TmsApi.DTOs;
 using TmsApi.Services; // For ICourseService
-
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OpenApi;
 namespace TmsApi.Controllers;
 
 [ApiController]
 [Route("api/courses")]
-public class CoursesController(ICourseService _courseService , LinkGenerator linkGenerator) : ControllerBase
+[Tags("Courses")]
+[Produces("application/json")]
+[ProducesResponseType(
+    typeof(ProblemDetails),
+    StatusCodes.Status500InternalServerError)]
+public class CoursesController(
+    ICourseService _courseService,
+    LinkGenerator linkGenerator)
+    : ControllerBase
 {
     // GET /api/courses
        [HttpGet]
+       [ProducesResponseType(
+    typeof(PagedResponse<CourseResponseDto>),
+    StatusCodes.Status200OK)]
+[EndpointSummary("List courses with pagination")]
+[EndpointDescription(
+    "Returns a paginated, optionally filtered list of TMS courses. PageSize is capped at 50.")]
 public async Task<IActionResult> GetCourses(
     [FromQuery] PagedRequest request,
     CancellationToken ct)
@@ -31,6 +46,15 @@ public async Task<IActionResult> GetCourses(
 
 
     [HttpGet("{id:int}", Name = nameof(GetCourseById))]
+    [ProducesResponseType(
+    typeof(CourseDetailDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    typeof(ProblemDetails),
+    StatusCodes.Status404NotFound)]
+[EndpointSummary("Get a course by ID")]
+[EndpointDescription(
+    "Returns course details with HATEOAS links. Returns 404 if the course does not exist.")]
 public async Task<IActionResult> GetCourseById(int id, CancellationToken ct)
 {
     var course = await _courseService.GetByIdAsync(id, ct);
@@ -79,6 +103,19 @@ public async Task<IActionResult> GetCourseById(int id, CancellationToken ct)
     return Ok(detail);
 }
     [HttpPost]
+
+    [ProducesResponseType(
+    typeof(CourseResponseDto),
+    StatusCodes.Status201Created)]
+[ProducesResponseType(
+    typeof(ValidationProblemDetails),
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    typeof(ProblemDetails),
+    StatusCodes.Status409Conflict)]
+[EndpointSummary("Create a new course")]
+[EndpointDescription(
+    "Creates a course with a unique code. Returns 409 if the course code already exists.")]
     public async Task<IActionResult> CreateCourse(CreateCourseRequest request, CancellationToken ct)
     {
         // Check business rule BEFORE trying to save
