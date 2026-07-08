@@ -14,12 +14,7 @@ public class EnrollmentsController(
 ) : ControllerBase
 {
     // GET /api/enrollments
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var enrollments = await _enrollmentService.GetAllAsync();
-        return Ok(enrollments);
-    }
+
 
     [HttpGet("{id:int}", Name = nameof(GetEnrollment))]
     public async Task<IActionResult> GetEnrollment(int courseId, int id, CancellationToken ct)
@@ -65,6 +60,23 @@ public class EnrollmentsController(
         var deleted = await _enrollmentService.DeleteAsync(id);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpGet(Name = "ListCourseEnrollments")]
+public async Task<IActionResult> GetEnrollments(
+    int courseId,
+    CancellationToken ct)
+{
+    // Check if the course exists
+
+    var course = await _courseService.GetByIdAsync(courseId, ct);
+
+    if (course is null)
+        return NotFound();
+
+    var enrollments = await _enrollmentService.GetByCourseAsync(courseId, ct);
+
+    return Ok(enrollments);
+}
 }
 
 // Request Model
