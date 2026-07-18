@@ -11,9 +11,7 @@ namespace TmsApi.Services;
 public interface ICourseService
 {
     Task<CourseResponseDto> CreateAsync(CreateCourseRequest course, CancellationToken ct);
-    Task<CourseRecord?> GetByCodeAsync(string code);
-
-    Task<IReadOnlyList<CourseRecord>> GetAllAsync();
+    
     Task<bool> DeleteAsync(string code);
 
     Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct);
@@ -34,20 +32,7 @@ public class CourseService : ICourseService
         _context = context;
     }
 
-    // Helper method to map a Course entity to a CourseRecord DTO
-    // includes calculating EnrolledCount from the database
-    private CourseRecord MapToCourseRecord(Course course)
-    {
-        int enrolledCount = course.Enrollments?.Count ?? 0; // Safely get count if loaded
-
-        return new CourseRecord(
-            Code: course.Code,
-            Title: course.Title,
-            Capacity: course.Capacity,
-            EnrolledCount: enrolledCount
-        );
-    }
-
+  
     
     public async Task<CourseResponseDto> CreateAsync(
         CreateCourseRequest request,
@@ -81,36 +66,6 @@ public class CourseService : ICourseService
                 c.Enrollments.Count
             ))
             .FirstOrDefaultAsync(ct);
-    }
-
-    public async Task<CourseRecord?> GetByCodeAsync(string code)
-    {
-        // Query the database, including Enrollments to calculate EnrolledCount
-        var courseEntity = await _context
-            .Courses.Include(c => c.Enrollments)
-            .FirstOrDefaultAsync(c => c.Code == code);
-
-        if (courseEntity == null)
-        {
-            _logger.LogWarning("Course {CourseCode} not found.", code);
-            return null;
-        }
-
-        // Map the found entity to the DTO
-        return MapToCourseRecord(courseEntity);
-    }
-
-    public async Task<IReadOnlyList<CourseRecord>> GetAllAsync()
-    {
-        // Query the database, including Enrollments for each course
-        var courseEntities = await _context
-            .Courses.Include(c => c.Enrollments) // Eagerly load enrollments
-            .ToListAsync();
-
-        // Map the list of entities to a list of DTOs
-        var courseRecords = courseEntities.Select(MapToCourseRecord).ToList();
-
-        return courseRecords.AsReadOnly(); // Return as IReadOnlyList for immutability
     }
 
     public async Task<bool> DeleteAsync(string code)

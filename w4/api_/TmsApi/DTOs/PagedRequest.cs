@@ -1,4 +1,4 @@
-namespace TmsApi.Dtos;
+namespace TmsApi.DTOs;
 
 public record PagedRequest
 {
@@ -10,16 +10,14 @@ public record PagedRequest
     public int PageSize
     {
         get => _pageSize;
-        init => _pageSize = value < 1
-            ? 20
-            : value > MaxPageSize
-                ? MaxPageSize
+        init =>
+            _pageSize =
+                value < 1 ? 20
+                : value > MaxPageSize ? MaxPageSize
                 : value;
     }
 
     public string? Search { get; init; }
-
-    public string OrderBy { get; init; } = "Title";
-
+    public string OrderBy { get; init; }
     public bool Descending { get; init; }
 }

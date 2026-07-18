@@ -10,6 +10,8 @@ public class Student
     public bool IsDeleted { get; set; } // For Soft Delete
     public uint Version { get; set; } // For Concurrency (xmin)
 
+    
+
     // Navigation property for many-to-many relationship
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
     public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();

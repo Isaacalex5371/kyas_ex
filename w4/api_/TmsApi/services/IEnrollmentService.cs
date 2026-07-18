@@ -14,33 +14,18 @@ public interface IEnrollmentService
         EnrollStudentRequest request,
         CancellationToken ct
     );
-
-    Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(
-    int courseId,
-    CancellationToken ct);
     Task<EnrollmentResponseDto?> GetByIdAsync(int courseId, int id, CancellationToken ct);
-    Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync();
+    Task<PagedResponse<EnrollmentResponseDto>> GetByCourseAsync(
+        int courseId,
+        PagedRequest request,
+        CancellationToken ct
+    );
     Task<bool> DeleteAsync(int id);
 }
 
 public class EnrollmentService(TmsDbContext _context, ILogger<EnrollmentService> _logger)
     : IEnrollmentService
 {
-    // Helper method to map an Enrollment entity to an EnrollmentRecord DTO
-    private EnrollmentRecord MapToEnrollmentRecord(Enrollment enrollment)
-    {
-        string studentRegNumber = enrollment.Student?.RegistrationNumber ?? "UNKNOWN";
-        string courseCode = enrollment.Course?.Code ?? "UNKNOWN";
-
-        return new EnrollmentRecord(
-            Id: enrollment.Id,
-            StudentId: studentRegNumber,
-            CourseCode: courseCode,
-            Grade: enrollment.Grade,
-            EnrolledAt: enrollment.EnrolledAt
-        );
-    }
-
     public async Task<EnrollmentResponseDto> CreateAsync(
         int courseId,
         EnrollStudentRequest request,
@@ -58,12 +43,6 @@ public class EnrollmentService(TmsDbContext _context, ILogger<EnrollmentService>
         _context.Enrollments.Add(enrollment);
         await _context.SaveChangesAsync(ct);
 
-        _logger.LogInformation(
-            "Enrolled student {StudentId} in course {CourseId}",
-            request.StudentId,
-            courseId
-        );
-
         return (await GetByIdAsync(courseId, enrollment.Id, ct))!;
     }
 
@@ -80,16 +59,42 @@ public class EnrollmentService(TmsDbContext _context, ILogger<EnrollmentService>
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync()
+    public async Task<PagedResponse<EnrollmentResponseDto>> GetByCourseAsync(
+        int courseId,
+        PagedRequest request,
+        CancellationToken ct
+    )
     {
-        var enrollmentEntities = await _context
-            .Enrollments.Include(e => e.Student)
-            .Include(e => e.Course)
-            .ToListAsync();
+        //start with no tracking
+        var query = _context.Enrollments.AsNoTracking();
 
-        var enrollmentRecords = enrollmentEntities.Select(MapToEnrollmentRecord).ToList();
+        var totalCount = await query.CountAsync(ct);
 
-        return enrollmentRecords.AsReadOnly();
+        var sortBy = string.IsNullOrWhiteSpace(request.OrderBy) ? "EnrolledAt" : request.OrderBy;
+
+        query = sortBy switch
+        {
+            "Grade" => request.Descending
+                ? query.OrderByDescending(e => e.Grade)
+                : query.OrderBy(e => e.Grade),
+            "EnrolledAt" or _ => request.Descending
+                ? query.OrderByDescending(e => e.EnrolledAt)
+                : query.OrderBy(e => e.EnrolledAt),
+        };
+
+        var items = await query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .Select(e => new EnrollmentResponseDto(e.Id, e.CourseId, e.StudentId, e.EnrolledAt))
+            .ToListAsync(ct);
+
+        return new PagedResponse<EnrollmentResponseDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = request.Page,
+            PageSize = request.PageSize,
+        };
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -109,22 +114,6 @@ public class EnrollmentService(TmsDbContext _context, ILogger<EnrollmentService>
 
         return true;
     }
-
-    public async Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(
-    int courseId,
-    CancellationToken ct)
-{
-    return await _context.Enrollments
-        .AsNoTracking()
-        .Where(e => e.CourseId == courseId)
-        .Select(e => new EnrollmentResponseDto(
-            e.Id,
-            e.CourseId,
-            e.StudentId,
-            e.EnrolledAt
-        ))
-        .ToListAsync(ct);
-}
 }
 
 public class TmsDatabaseException(string message) : Exception(message);
