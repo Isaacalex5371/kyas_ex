@@ -1,22 +1,67 @@
-// this is the code and what should i do bro i did no what is going on 
 using Asp.Versioning;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using TmsApi.Api.ExceptionHandlers;
+using TmsApi.Application.Behaviors;
+using TmsApi.Application.Enrollments.Commands;
 using TmsApi.Application.Interfaces;
+using TmsApi.Filters;
 using TmsApi.Infrastructure.Persistence;
+using TmsApi.Infrastructure.Services;
 using TmsApi.Middleware;
-using TmsApi.Services;
-using TmsApi.TmsApi.Api;
+
 var builder = WebApplication.CreateBuilder(args);
 
-
 // --- 1. SERVICES (BUILDER SECTION) ---
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(EnrollStudentHandler).Assembly)
+);
+builder.Services.AddValidatorsFromAssembly(typeof(EnrollStudentValidator).Assembly);
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+builder.Services.AddOpenApi(
+    "v1",
+    options =>
+    {
+        options.ShouldInclude = description => description.GroupName == "v1";
+    }
+);
 
-builder.Services.AddProblemDetails(); // Required for Exercise 6
-builder.Services.AddOpenApi(); // Required for Exercise 7
-builder.Services.AddControllers(); // Required for Exercise 5
-builder.Services.AddExceptionHandler(options => { }); // Required to prevent startup crash
+builder.Services.AddOpenApi(
+    "v2",
+    options =>
+    {
+        options.ShouldInclude = description => description.GroupName == "v2";
+    }
+);
+
+builder
+    .Services.AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true; // Tells the user which versions exist in the headers
+        options.ApiVersionReader = ApiVersionReader.Combine(
+            new UrlSegmentApiVersionReader(),
+            new HeaderApiVersionReader("X-Api-Version")
+        );
+    })
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
+    });
+
+builder.Services.AddControllers(options =>
+{
+    // This applies the filter to EVERY controller in the project
+    options.Filters.Add<AuditLogFilter>();
+});
 
 // Exercise 2 Services & DI Validation
 builder.Services.AddSingleton<EnrollmentWorker>();
@@ -24,38 +69,17 @@ builder.Services.AddSingleton<EnrollmentWorker>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
-
-
-builder.Services.AddOpenApi("v1", options =>
-{
-    options.ShouldInclude=description => description.GroupName == "v1";
-});
-
- builder.Services.AddOpenApi("v2", options =>
- {
-    options.ShouldInclude=description => description.GroupName == "v2";
- });
-
- builder.Services.AddApiVersioning(options =>
- {
-        options.DefaultApiVersion = new ApiVersion(1, 0);
-    options.AssumeDefaultVersionWhenUnspecified = true;
-  options.ReportApiVersions = true;
-  options.ApiVersionReader= new UrlSegmentApiVersionReader();
-options.ApiVersionReader = ApiVersionReader.Combine(
-new UrlSegmentApiVersionReader(),
-new HeaderApiVersionReader("X-Api-Version"));
-  
- }).AddApiExplorer(options =>
- {
-    options.GroupNameFormat="'v'VVV";
-    options.SubstituteApiVersionInUrl=true;
- });
+// builder.Services.AddScoped<ICertificateService, CertificateService>();
+// builder.Services.AddScoped<IAssessmentService, AssessmentService>();
 
 // Register TmsDbContext scoped for incoming HTTP requests
 
-builder.Services.AddDbContext<TmsDbContext>(options =>options.UseNpgsql(builder.Configuration.GetConnectionString("TmsDatabase")));
-     // Show parameters in querylogs (dev only)
+builder.Services.AddDbContext<TmsDbContext>(options =>
+    options
+        .UseNpgsql(builder.Configuration.GetConnectionString("TmsDatabase"))
+        .LogTo(Console.WriteLine, LogLevel.Information) // Log SQLto output window
+        .EnableSensitiveDataLogging()
+); // Show parameters in querylogs (dev only)
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
@@ -82,6 +106,7 @@ var app = builder.Build();
 
 // 1. Logging is the outer wrapper (Session 1B)
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<V1DeprecationMiddleware>();
 
 // 2. Exception handling (Session 3 / Exercise 6)
 app.UseExceptionHandler();
@@ -97,65 +122,27 @@ app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-  app.MapScalarApiReference(options =>
-{
-options.WithTitle("TMS API Reference")
-.WithTheme(ScalarTheme.DeepSpace)
-.WithDefaultHttpClient(ScalarTarget.CSharp,
-ScalarClient.HttpClient);
-// Tell Scalar to pull both documents into its sidebar dropdown
-options
-.AddDocument("v1", "API Version 1.0")
-.AddDocument("v2", "API Version 2.0");
-});
-}
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("TMS API Reference")
+            .WithTheme(ScalarTheme.DeepSpace)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
 
-app.UseMiddleware<V1DeprecationMiddleware>();
+        // This adds the dropdown for V1 and V2
+        options.AddDocument("v1", "API Version 1.0");
+        options.AddDocument("v2", "API Version 2.0");
+    });
+}
 
 // 4. Map Controllers (Exercise 5)
 app.MapControllers();
 
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-
-    var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
-
-    await DataSeeder.SeedAsync(context);
-}
-
-
-// --- 3. MINIMAL API ENDPOINTS (FOR TESTING) ---
-
-app.MapGet(
-        "/api/assessments/results",
-        () =>
-            Results.Ok(
-                new
-                {
-                    courseCode = "CS-101",
-                    studentId = "S-001",
-                    letterGrade = "A",
-                }
-            )
-    )
-    .RequireAuthorization();
-
-app.MapGet(
-    "/api/enrollments/worker-smoke",
-    (EnrollmentWorker worker) =>
-    {
-        worker.ProcessBatch();
-        return Results.Ok("processed");
-    }
-);
-
-app.MapGet(
-    "/api/error",
-    () =>
-    {
-        throw new TmsDatabaseException("Simulated database failure for ProblemDetails testing");
-    }
-);
+// if (app.Environment.IsDevelopment())
+// {
+//     using var scope = app.Services.CreateScope();
+//     var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
+//     await TmsApi.Persistence.DataSeeder.SeedAsync(context);
+// }
 
 app.Run();

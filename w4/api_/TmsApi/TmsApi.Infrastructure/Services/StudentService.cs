@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using TmsApi.Infrastructure.Persistence;
-using TmsApi.Domain.Entities;
-using TmsApi.Application.DTOs;
 using Microsoft.Extensions.Logging;
+using TmsApi.Application.DTOs;
+using TmsApi.Domain.Entities;
+using TmsApi.Infrastructure.Persistence;
 using TmsApi.Application.Interfaces;
 
-namespace TmsApi.Services;
+namespace TmsApi.Infrastructure.Services;
 
-
-public class StudentService(ILogger<StudentService> _logger, TmsDbContext _context)
+public class StudentService(ILogger<StudentService> logger, TmsDbContext context)
     : IStudentService
 {
     public async Task<StudentResponseDTO> RegisterAsync(
@@ -25,18 +24,18 @@ public class StudentService(ILogger<StudentService> _logger, TmsDbContext _conte
             IsActive = true,
         };
 
-        _context.Students.Add(studentEntity);
+        context.Students.Add(studentEntity);
 
         // Access the "Shadow" property through the Entry API
-        _context.Entry(studentEntity).Property("LastUpdated").CurrentValue = DateTime.UtcNow;
-        await _context.SaveChangesAsync(ct);
+        context.Entry(studentEntity).Property("LastUpdated").CurrentValue = DateTime.UtcNow;
+        await context.SaveChangesAsync(ct);
 
         return (await GetByIdAsync(studentEntity.Id, ct))!;
     }
 
     public async Task<StudentResponseDTO?> GetByIdAsync(int id, CancellationToken ct)
     {
-        return await _context
+        return await context
             .Students.AsNoTracking()
             .Where(s => s.Id == id)
             .Select(s => new StudentResponseDTO(
@@ -56,7 +55,7 @@ public class StudentService(ILogger<StudentService> _logger, TmsDbContext _conte
         CancellationToken ct
     )
     {
-        var query = _context.Students.AsNoTracking();
+        var query = context.Students.AsNoTracking();
 
         if (includeDeleted)
         {
@@ -109,12 +108,12 @@ public class StudentService(ILogger<StudentService> _logger, TmsDbContext _conte
 
     public async Task<StudentResponseDTO?> UpdateAsync(int id, UpdateStudentRequest request)
     {
-        var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
+        var student = await context.Students.FirstOrDefaultAsync(s => s.Id == id);
         if (student == null)
             return null;
 
         // Set the original version to check for concurrency
-        _context.Entry(student).Property(s => s.Version).OriginalValue = request.Version;
+        context.Entry(student).Property(s => s.Version).OriginalValue = request.Version;
 
         // Update all editable fields
         if (request.Name != null)
@@ -125,11 +124,11 @@ public class StudentService(ILogger<StudentService> _logger, TmsDbContext _conte
             student.IsActive = request.IsActive.Value;
 
         // Set Audit Shadow Property
-        _context.Entry(student).Property("LastUpdated").CurrentValue = DateTime.UtcNow;
+        context.Entry(student).Property("LastUpdated").CurrentValue = DateTime.UtcNow;
 
         try
         {
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return new StudentResponseDTO(
                 student.Id,
                 student.RegistrationNumber,
@@ -141,26 +140,26 @@ public class StudentService(ILogger<StudentService> _logger, TmsDbContext _conte
         }
         catch (DbUpdateConcurrencyException)
         {
-            _logger.LogWarning("Concurrency conflict on Student {Id}", id);
+            logger.LogWarning("Concurrency conflict on Student {Id}", id);
             throw; // Controller will catch this
         }
     }
 
     public async Task<bool> SoftDeleteAsync(int id)
     {
-        var hasEnrollment = await _context.Enrollments.AnyAsync(e => e.StudentId == id);
+        var hasEnrollment = await context.Enrollments.AnyAsync(e => e.StudentId == id);
 
         if (hasEnrollment)
         {
-            _logger.LogWarning("Cannot delete student {studentId}: active enrollments exist.", id);
+            logger.LogWarning("Cannot delete student {studentId}: active enrollments exist.", id);
             return false;
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
+        var student = await context.Students.FirstOrDefaultAsync(s => s.Id == id);
         if (student == null)
             return false;
         student.IsDeleted = true;
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return true;
     }
 
@@ -168,38 +167,38 @@ public class StudentService(ILogger<StudentService> _logger, TmsDbContext _conte
     {
         // We want to archive everything where the EnrolledAt year is LESS than that.
 
-        int rowsAffected = await _context
+        int rowsAffected = await context
             .Enrollments.Where(e => e.EnrolledAt.Year < yearThreshold && !e.IsArchived)
             .ExecuteUpdateAsync(setters => setters.SetProperty(e => e.IsArchived, true));
 
-        _logger.LogInformation("Bulk archive completed. {Count} rows archived.", rowsAffected);
+        logger.LogInformation("Bulk archive completed. {Count} rows archived.", rowsAffected);
         return rowsAffected;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
         // First, check for existing enrollments using the DbContext
-        var hasEnrollment = await _context.Enrollments.AnyAsync(e => e.StudentId == id);
+        var hasEnrollment = await context.Enrollments.AnyAsync(e => e.StudentId == id);
 
         if (hasEnrollment)
         {
-            _logger.LogWarning("Cannot delete student {studentId}: active enrollments exist.", id);
+            logger.LogWarning("Cannot delete student {studentId}: active enrollments exist.", id);
             return false;
         }
 
         // Find the student to delete
-        var studentToDelete = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
+        var studentToDelete = await context.Students.FirstOrDefaultAsync(s => s.Id == id);
 
         if (studentToDelete == null)
         {
-            _logger.LogWarning("Delete Failed: student with ID: {studentId} not found.", id);
+            logger.LogWarning("Delete Failed: student with ID: {studentId} not found.", id);
             return false;
         }
 
-        _context.Students.Remove(studentToDelete); // Stage for deletion
-        await _context.SaveChangesAsync(); // Commit deletion to the database
+        context.Students.Remove(studentToDelete); // Stage for deletion
+        await context.SaveChangesAsync(); // Commit deletion to the database
 
-        _logger.LogInformation("Deleted Student {studentId}", id);
+        logger.LogInformation("Deleted Student {studentId}", id);
         return true;
     }
 
