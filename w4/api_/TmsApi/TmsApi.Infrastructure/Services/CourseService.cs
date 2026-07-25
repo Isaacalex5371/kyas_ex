@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging; // For ToListAsync, FirstOrDefaultAsync, Include, AnyAsync, etc.
 using TmsApi.Application.DTOs;
@@ -211,4 +212,9 @@ public class CourseService : ICourseService
 
     public async Task<bool> CodeExistsAsync(string code, CancellationToken ct) =>
         await _context.Courses.AsNoTracking().AnyAsync(c => c.Code == code, ct);
+
+    public async Task<List<Course>> GetAllAsync(CancellationToken ct)
+    {
+        return await _context.Courses.AsNoTracking().Include(c => c.Enrollments).ToListAsync(ct);
+    }
 }

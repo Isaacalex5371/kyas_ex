@@ -584,6 +584,22 @@
           }
         }
       },
+      "Microsoft.Extensions.Caching.Hybrid/10.8.0": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Microsoft.Extensions.Caching.Hybrid.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.Extensions.Caching.Hybrid.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
       "Microsoft.Extensions.DependencyModel/10.0.10": {
         "type": "package",
         "compile": {
@@ -2329,6 +2345,33 @@
         "microsoft.entityframeworkcore.relational.nuspec"
       ]
     },
+    "Microsoft.Extensions.Caching.Hybrid/10.8.0": {
+      "sha512": "RCtCTK3eqKXx8LXqd7B8GjbTkIp4k3EgKeunaCmBJ+WA55Nva83CI2I+wVyp0S9jTG+aT6AYWQbkKOfvFOlmLA==",
+      "type": "package",
+      "path": "microsoft.extensions.caching.hybrid/10.8.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "README.md",
+        "buildTransitive/net462/Microsoft.Extensions.Caching.Hybrid.targets",
+        "buildTransitive/net8.0/_._",
+        "lib/net10.0/Microsoft.Extensions.Caching.Hybrid.dll",
+        "lib/net10.0/Microsoft.Extensions.Caching.Hybrid.xml",
+        "lib/net462/Microsoft.Extensions.Caching.Hybrid.dll",
+        "lib/net462/Microsoft.Extensions.Caching.Hybrid.xml",
+        "lib/net8.0/Microsoft.Extensions.Caching.Hybrid.dll",
+        "lib/net8.0/Microsoft.Extensions.Caching.Hybrid.xml",
+        "lib/net9.0/Microsoft.Extensions.Caching.Hybrid.dll",
+        "lib/net9.0/Microsoft.Extensions.Caching.Hybrid.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.Caching.Hybrid.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Caching.Hybrid.xml",
+        "lib/netstandard2.1/Microsoft.Extensions.Caching.Hybrid.dll",
+        "lib/netstandard2.1/Microsoft.Extensions.Caching.Hybrid.xml",
+        "microsoft.extensions.caching.hybrid.10.8.0.nupkg.sha512",
+        "microsoft.extensions.caching.hybrid.nuspec"
+      ]
+    },
     "Microsoft.Extensions.DependencyModel/10.0.10": {
       "sha512": "rfZA1RjR021RPqSmIPovfz2aOd79TGqJ9BengbjnzIISOVwjLmuSDnhCMmiY/1c6iYvGolQ1iNGzkav0u11XEA==",
       "type": "package",
@@ -2868,6 +2911,7 @@
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.8",
       "Microsoft.AspNetCore.OpenApi >= 10.0.9",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.10",
+      "Microsoft.Extensions.Caching.Hybrid >= 10.8.0",
       "Scalar.AspNetCore >= 2.16.2",
       "TmsApi.Application >= 1.0.0",
       "TmsApi.Infrastructure >= 1.0.0"
@@ -2880,11 +2924,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj",
+      "projectUniqueName": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj",
       "projectName": "TmsApi.Api",
-      "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj",
+      "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj",
       "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-      "outputPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\obj\\",
+      "outputPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -2907,11 +2951,11 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
-              "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj"
+            "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
+              "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj"
             },
-            "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj": {
-              "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj"
+            "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj": {
+              "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj"
             }
           }
         }
@@ -2954,6 +2998,10 @@
             "suppressParent": "All",
             "target": "Package",
             "version": "[10.0.10, )"
+          },
+          "Microsoft.Extensions.Caching.Hybrid": {
+            "target": "Package",
+            "version": "[10.8.0, )"
           },
           "Scalar.AspNetCore": {
             "target": "Package",
