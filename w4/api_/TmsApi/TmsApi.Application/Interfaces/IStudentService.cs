@@ -1,6 +1,6 @@
 using TmsApi.Application.DTOs;
-namespace TmsApi.Application.Interfaces;
 
+namespace TmsApi.Application.Interfaces;
 
 public interface IStudentService
 {

@@ -1,0 +1,158 @@
+<div class="min-h-screen bg-slate-100 py-10 px-6">
+  <div class="mx-auto max-w-3xl">
+
+    <div class="mb-8">
+      <h2 class="text-4xl font-bold text-slate-800">
+         Course Enrollment
+      </h2>
+      <p class="mt-2 text-slate-500">
+        Fill out the form below to enroll in your desired course.
+      </p>
+    </div>
+
+    @if (submitted()) {
+
+    <div
+      class="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 shadow-sm">
+      Enrollment submitted. Check the console for the payload.
+    </div>
+
+    } @else {
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="space-y-6 rounded-2xl bg-white p-8 shadow-lg">
+
+      <!-- Student ID -->
+      <div>
+        <label
+          for="studentId"
+          class="mb-2 block text-sm font-semibold text-slate-700">
+          Student ID
+        </label>
+
+        <input
+          id="studentId"
+          formControlName="studentId"
+          placeholder="e.g. STU-1234"
+          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+
+        @if (form.controls.studentId.touched &&
+        form.controls.studentId.invalid) {
+
+        <p class="mt-2 text-sm font-medium text-red-500">
+          Enter a valid Student ID (format: STU-0000)
+        </p>
+
+        }
+      </div>
+
+      <!-- Course ID -->
+      <div>
+        <label
+          for="courseId"
+          class="mb-2 block text-sm font-semibold text-slate-700">
+          Course ID
+        </label>
+
+        <input
+          id="courseId"
+          formControlName="courseId"
+          placeholder="e.g. 1 (TMS course primary key)"
+          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+
+        @if (form.controls.courseId.touched &&
+        form.controls.courseId.invalid) {
+
+        <p class="mt-2 text-sm font-medium text-red-500">
+          Course ID is required.
+        </p>
+
+        }
+      </div>
+
+      <!-- Term -->
+      <div>
+        <label
+          for="term"
+          class="mb-2 block text-sm font-semibold text-slate-700">
+          Term
+        </label>
+
+        <input
+          id="term"
+          formControlName="term"
+          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label
+          for="notes"
+          class="mb-2 block text-sm font-semibold text-slate-700">
+          Notes (Optional)
+        </label>
+
+        <textarea
+          id="notes"
+          formControlName="notes"
+          rows="4"
+          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"></textarea>
+      </div>
+
+      <!-- Backup Courses -->
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+
+        <h3 class="mb-5 text-xl font-bold text-slate-800">
+          Backup Courses
+        </h3>
+
+        @for (backup of backups.controls; track $index) {
+
+        <div class="mb-4 flex gap-3">
+
+          <input
+            [formControl]="backup"
+            [placeholder]="'Backup course ' + ($index + 1)"
+            class="flex-1 rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+
+          <button
+            type="button"
+            (click)="removeBackup($index)"
+            class="rounded-xl bg-red-500 px-4 text-white transition hover:bg-red-600">
+            Remove
+          </button>
+
+        </div>
+
+        }
+
+        <button
+          type="button"
+          (click)="addBackup()"
+          class="rounded-xl bg-slate-800 px-5 py-3 font-medium text-white transition hover:bg-slate-900">
+          + Add Backup Course
+        </button>
+
+      </div>
+
+      <div class="border-t pt-6">
+
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="w-full rounded-xl bg-indigo-600 py-4 text-lg font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">
+
+          Confirm Enrollment
+
+        </button>
+
+      </div>
+
+    </form>
+
+    }
+
+  </div>
+</div>
