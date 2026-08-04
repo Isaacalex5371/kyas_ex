@@ -1,0 +1,69 @@
+<div class="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg border border-brand-muted/15 font-sans">
+  <h2 class="text-xl font-bold text-brand-charcoal mb-6 pb-2 border-b border-brand-offwhite">
+    Enrollment Approval Queue
+  </h2>
+
+  <!-- Loading State with Spinner -->
+  @if (store.isLoading()) {
+    <div class="flex items-center gap-3 py-6 text-brand-muted">
+      <svg class="animate-spin h-5 w-5 text-brand-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="font-semibold text-sm">Loading enrollments...</span>
+    </div>
+  }
+
+  <!-- Queue Cards list -->
+  <div class="flex flex-col gap-4">
+    @for (enrollment of store.entities(); track enrollment.id) {
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-brand-offwhite border border-brand-muted/10 rounded-lg gap-4 transition-all hover:border-brand-muted/20">
+        <div class="flex-1">
+          <p class="font-bold text-brand-charcoal text-base">
+            {{ enrollment.studentName }}
+          </p>
+          <p class="text-sm text-brand-muted">
+            Course: <span class="font-semibold text-brand-charcoal">{{ enrollment.courseName }}</span>
+          </p>
+          <p class="text-xs text-brand-muted mt-1">
+            Enrolled at: {{ enrollment.enrolledAt | date:'medium' }}
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end">
+          <!-- Branded Status Pill -->
+          <span 
+            class="text-xs font-bold py-1 px-3 rounded-full"
+            [class]="enrollment.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
+                     enrollment.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
+                     'bg-red-100 text-red-800'"
+          >
+            {{ enrollment.status }}
+          </span>
+
+          <!-- Approve Action Button -->
+          @if (enrollment.status === 'Pending') {
+            <button 
+              (click)="onApprove(enrollment.id)"
+              class="px-4 py-2 text-xs font-bold text-white bg-brand-primary hover:bg-brand-primary/95 rounded-lg shadow transition-colors cursor-pointer"
+            >
+              Approve
+            </button>
+          }
+        </div>
+      </div>
+    } @empty {
+      <p class="text-center py-8 text-brand-muted font-medium">No enrollment requests in the queue.</p>
+    }
+  </div>
+
+  <!-- Global Store Error State -->
+  @if (store.error()) {
+    <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-center gap-2 mt-6 text-sm font-semibold shadow-sm">
+      <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+      </svg>
+      <span>{{ store.error() }}</span>
+    </div>
+  }
+</div>
