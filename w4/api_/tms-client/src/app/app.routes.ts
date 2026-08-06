@@ -10,6 +10,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path:'i-dashboard'
+    ,
+    loadComponent:()=>
+      import('./features/instructor-dashboard/instructor-dashboard').then (
+    (m)=> m.InstructorDashboard)
+  }
+  ,
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',
