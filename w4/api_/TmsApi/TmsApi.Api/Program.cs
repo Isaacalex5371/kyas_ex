@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using System.Threading.RateLimiting;
 using Asp.Versioning;
 using FluentValidation;
@@ -12,9 +13,12 @@ using TmsApi.Api.RateLimiting;
 using TmsApi.Application.Behaviors;
 using TmsApi.Application.Enrollments.Commands;
 using TmsApi.Application.Interfaces;
+using TmsApi.Application.Trasnscripts;
 using TmsApi.Filters;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Infrastructure.Services;
+using TmsApi.Infrastructure.Transcripts;
+using TmsApi.Infrastructure.Workers;
 using TmsApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,8 +48,7 @@ builder.Services.AddOpenApi(
     }
 );
 
-builder
-    .Services.AddApiVersioning(options =>
+builder.Services.AddApiVersioning(options =>
     {
         options.DefaultApiVersion = new ApiVersion(1, 0);
         options.AssumeDefaultVersionWhenUnspecified = true;
@@ -168,16 +171,10 @@ builder.Host.UseDefaultServiceProvider(options =>
 });
 
 // Exercise 3: Options Pattern
-builder
-    .Services.AddOptions<PaymentOptions>()
-    .BindConfiguration("Payments")
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+builder.Services.AddOptions<PaymentOptions>().BindConfiguration("Payments").ValidateDataAnnotations().ValidateOnStart();
 
 // Session 1: Auth
-builder
-    .Services.AddAuthentication("Training")
-    .AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
+builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
 builder.Services.AddHybridCache(options =>
 {
@@ -186,6 +183,24 @@ builder.Services.AddHybridCache(options =>
         Expiration = TimeSpan.FromMinutes(10),
         LocalCacheExpiration = TimeSpan.FromMinutes(2),
     };
+});
+builder.Services.AddHealthChecks();
+builder.Services.AddHostedService<TranscriptWorker>();
+// Replace 'TranscriptStatusStore' with the actual name of your implementation class
+builder.Services.AddSingleton<ITranscriptStatusStore, InMemoryTranscriptStatusStore>();
+
+builder.Services.AddSingleton(Channel.CreateBounded<TranscriptRequest>(
+new BoundedChannelOptions(100)
+{
+FullMode = BoundedChannelFullMode.Wait
+}));
+
+builder.Services.AddCors(options =>
+{
+options.AddPolicy("AllowAngular", policy =>
+policy.WithOrigins("http://localhost:4200")
+.AllowAnyHeader()
+.AllowAnyMethod());
 });
 
 var app = builder.Build();
@@ -202,6 +217,7 @@ app.UseStatusCodePages(); //( Exercise 6 TODO 3) Turns 404s into JSON ProblemDet
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("AllowAngular");
 app.UseRateLimiter();
 app.MapHealthChecks("/health/live").DisableRateLimiting();
 app.MapHealthChecks("/health/ready").DisableRateLimiting();
@@ -235,5 +251,6 @@ app.MapControllers();
 //     var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
 //     await TmsApi.Persistence.DataSeeder.SeedAsync(context);
 // }
+
 
 app.Run();
