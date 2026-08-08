@@ -16,23 +16,23 @@
       </p>
     </div>
 
-    <span class="text-3xl">📚</span>
+    <!-- <span class="text-3xl">📚</span> -->
   </div>
 
   <!-- Enrollment -->
   <div class="mb-4">
     <div class="mb-2 flex justify-between text-sm text-slate-500">
       <span>Enrollment</span>
-      <span>{{ course().enrollmentCount }} / {{ course().Capacity }}</span>
+      <!-- <span>{{ course().enrollmentCount }} / {{ course().Capacity }}</span> -->
     </div>
 
     <!-- Progress Bar -->
-    <div class="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+    <!-- <div class="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
       <div
         class="h-full rounded-full bg-indigo-600"
-        [style.width.%]="(course().enrollmentCount / course().Capacity) * 100">
+        [style.width.%]="(course().enrollmentCount - 20 / course().Capacity) * 100">
       </div>
-    </div>
+    </div> -->
   </div>
 
   <!-- Status -->

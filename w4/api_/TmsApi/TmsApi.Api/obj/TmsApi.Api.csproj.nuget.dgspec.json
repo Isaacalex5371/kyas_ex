@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj": {}
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\tmsapi.api\\TmsApi.Api.csproj": {}
   },
   "projects": {
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj": {
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\tmsapi.api\\TmsApi.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj",
+        "projectUniqueName": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\tmsapi.api\\TmsApi.Api.csproj",
         "projectName": "TmsApi.Api",
-        "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\TmsApi.Api.csproj",
+        "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\tmsapi.api\\TmsApi.Api.csproj",
         "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-        "outputPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Api\\obj\\",
+        "outputPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\tmsapi.api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -34,11 +34,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
-                "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj"
+              "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
+                "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj"
               },
-              "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj": {
-                "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj"
+              "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj": {
+                "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj"
               }
             }
           }
@@ -528,14 +528,14 @@
         }
       }
     },
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj",
+        "projectUniqueName": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj",
         "projectName": "TmsApi.Application",
-        "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj",
+        "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj",
         "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-        "outputPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\obj\\",
+        "outputPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -558,8 +558,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
-                "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj"
+              "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
+                "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj"
               }
             }
           }
@@ -888,14 +888,14 @@
         }
       }
     },
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
+        "projectUniqueName": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
         "projectName": "TmsApi.Domain",
-        "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
+        "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
         "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-        "outputPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\obj\\",
+        "outputPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1230,14 +1230,14 @@
         }
       }
     },
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj": {
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj",
+        "projectUniqueName": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj",
         "projectName": "TmsApi.Infrastructure",
-        "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj",
+        "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-        "outputPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\obj\\",
+        "outputPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1260,11 +1260,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
-                "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj"
+              "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj": {
+                "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Application\\TmsApi.Application.csproj"
               },
-              "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
-                "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj"
+              "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
+                "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj"
               }
             }
           }
@@ -1297,6 +1297,10 @@
               "version": "[10.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.Relational": {
+              "target": "Package",
+              "version": "[10.0.10, )"
+            },
+            "Microsoft.Extensions.Hosting.Abstractions": {
               "target": "Package",
               "version": "[10.0.10, )"
             },

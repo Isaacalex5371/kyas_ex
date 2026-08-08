@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {}
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {}
   },
   "projects": {
-    "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
+    "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
+        "projectUniqueName": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
         "projectName": "TmsApi.Domain",
-        "projectPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
+        "projectPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\TmsApi.Domain.csproj",
         "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-        "outputPath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\obj\\",
+        "outputPath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

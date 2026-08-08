@@ -34,14 +34,15 @@ namespace TmsApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("MaxScore")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<decimal>("Weight")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(3, 2)");
 
                     b.HasKey("Id");
 
@@ -66,7 +67,8 @@ namespace TmsApi.Migrations
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("integer");
@@ -74,6 +76,9 @@ namespace TmsApi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
 
                     b.HasIndex("StudentId");
 
@@ -128,6 +133,10 @@ namespace TmsApi.Migrations
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("integer");
