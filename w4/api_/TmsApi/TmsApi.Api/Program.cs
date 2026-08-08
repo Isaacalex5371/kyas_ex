@@ -9,10 +9,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Scalar.AspNetCore;
 using TmsApi.Api.ExceptionHandlers;
+using TmsApi.Api.Hubs;
+using TmsApi.Api.Notifications;
 using TmsApi.Api.RateLimiting;
 using TmsApi.Application.Behaviors;
 using TmsApi.Application.Enrollments.Commands;
 using TmsApi.Application.Interfaces;
+using TmsApi.Application.Notifications;
 using TmsApi.Application.Trasnscripts;
 using TmsApi.Filters;
 using TmsApi.Infrastructure.Persistence;
@@ -192,8 +195,10 @@ builder.Services.AddSingleton<ITranscriptStatusStore, InMemoryTranscriptStatusSt
 builder.Services.AddSingleton(Channel.CreateBounded<TranscriptRequest>(
 new BoundedChannelOptions(100)
 {
-FullMode = BoundedChannelFullMode.Wait
+    FullMode = BoundedChannelFullMode.Wait
 }));
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<ITranscriptNotificationService, SignalRTranscriptNotificationService>();
 
 builder.Services.AddCors(options =>
 {
@@ -208,6 +213,7 @@ var app = builder.Build();
 // --- 2. MIDDLEWARE PIPELINE (ORDER MATTERS) ---
 
 // 1. Logging is the outer wrapper (Session 1B)
+app.MapHub<TmsHub>("/hubs/tms");
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<V1DeprecationMiddleware>();
 

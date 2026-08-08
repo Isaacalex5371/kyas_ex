@@ -2,12 +2,18 @@ using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TmsApi.Application.Notifications;
 using TmsApi.Application.Trasnscripts;
 using TmsApi.Infrastructure.Transcripts;
 
 namespace TmsApi.Infrastructure.Workers;
 
-public class TranscriptWorker(Channel<TranscriptRequest> channel,IServiceScopeFactory scopeFactory,ITranscriptStatusStore statusStore,ILogger<TranscriptWorker> logger): BackgroundService
+public class TranscriptWorker(
+Channel<TranscriptRequest> channel,
+ITranscriptStatusStore statusStore,
+ IServiceScopeFactory scopeFactory, 
+ITranscriptNotificationService notificationService,
+ILogger<TranscriptWorker> logger) : BackgroundService
 {
 protected override async Task ExecuteAsync(CancellationToken ct)
 {
@@ -23,7 +29,8 @@ using var scope = scopeFactory.CreateScope();
 // Real production: pull the EF context, render PDF, save to blob storage.
 await Task.Delay(TimeSpan.FromSeconds(5), ct);
 var downloadUrl = $"/api/v2/transcripts/{reportId}/download";
-await statusStore.MarkReadyAsync(reportId, downloadUrl,ct);
+                await statusStore.MarkReadyAsync(reportId, downloadUrl, ct);
+await notificationService.NotifyTranscriptReadyAsync(request.StudentId, reportId, downloadUrl);
 logger.LogInformation("Transcript ready: {ReportId}", reportId);
 }
 catch (OperationCanceledException) when (ct.IsCancellationRequested)

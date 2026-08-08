@@ -4,7 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.Enrollments.Commands;
 using TmsApi.Application.Enrollments.Queries;
 using TmsApi.Application.Interfaces; // For IEnrollmentService
-using TmsApi.Application.DTOs;      // For EnrollmentQueueResponseDto
+using TmsApi.Application.DTOs;
+using Microsoft.AspNetCore.SignalR;
+using TmsApi.Api.Hubs;
+using TmsApi.Application.Hubs;      // For EnrollmentQueueResponseDto
 
 [ApiController]
 [Route("api/v{version:apiVersion}/enrollments")]
@@ -12,7 +15,8 @@ using TmsApi.Application.DTOs;      // For EnrollmentQueueResponseDto
 [Tags("Enrollments")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-public class EnrollmentsController(IMediator mediator, IEnrollmentService enrollmentService) : ControllerBase
+public class EnrollmentsController(IMediator mediator, IEnrollmentService enrollmentService ,IHubContext<TmsHub,
+    ITmsHubClient> hubContext) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(typeof(EnrollmentCreated), StatusCodes.Status201Created)]
@@ -47,7 +51,7 @@ public class EnrollmentsController(IMediator mediator, IEnrollmentService enroll
             }
         );
     }
-// GET /api/v2/enrollments/{studentId}/schedule
+    // GET /api/v2/enrollments/{studentId}/schedule
     [HttpGet("{studentId}/schedule")]
     [HttpGet("{studentId:int}/schedule", Name = nameof(GetSchedule))]
     [ProducesResponseType(typeof(ScheduleDto), StatusCodes.Status200OK)]
@@ -59,7 +63,7 @@ public class EnrollmentsController(IMediator mediator, IEnrollmentService enroll
         return Ok(schedule);
     }
 
-     // GET /api/v2/enrollments
+    // GET /api/v2/enrollments
     [HttpGet]
     [ProducesResponseType(typeof(System.Collections.Generic.IEnumerable<EnrollmentQueueResponseDto>), StatusCodes.Status200OK)]
     [EndpointSummary("Get all enrollment requests (V2 Queue)")]
@@ -89,7 +93,11 @@ public class EnrollmentsController(IMediator mediator, IEnrollmentService enroll
         {
             return NotFound();
         }
-
+await hubContext.Clients.All
+    .ReceiveEnrollmentStatusUpdated(id, "Approved");
         return NoContent();
     }
+
+
+
 }
