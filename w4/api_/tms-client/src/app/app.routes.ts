@@ -34,5 +34,11 @@ loadComponent: () => import('./features/enrollment-form/enrollment-form')
 {path:'queue',
   loadComponent:()=>
     import('./features/enrollment-list/enrollment-list').then((m)=>EnrollmentList)
+},
+{
+path: 'grade-submission',
+loadComponent: () =>
+import('./features/grade-submission/grade-submission.component')
+.then(m => m.GradeSubmissionComponent)
 }
 ];
