@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "oLrxdXDF8k4=",
+  "dgSpecHash": "URK3SMjdEec=",
   "success": true,
-  "projectFilePath": "d:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj",
+  "projectFilePath": "D:\\isaac\\educational purpose only\\kyas\\exerscise\\w4\\api_\\TmsApi\\TmsApi.Infrastructure\\TmsApi.Infrastructure.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\isaac\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\isaac\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512",
     "C:\\Users\\isaac\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\12.1.1\\fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
     "C:\\Users\\isaac\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

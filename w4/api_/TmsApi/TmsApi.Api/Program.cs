@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Asp.Versioning;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,22 @@ using TmsApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var services = new CryptoDemoService();
+string hash1 = services.HashUserPassword("Password123!");
+string hash2 =services.HashUserPassword("Password123!");
+
+Console.WriteLine("*********************************************");
+Console.WriteLine($"Hash 1: {hash1}");
+Console.WriteLine($"Hash 2: {hash2}");
+Console.WriteLine($"Verify 1: {services.VerifyUserPassword("Password123!",hash1)}");
+Console.WriteLine($"Verify 2: {services.VerifyUserPassword("Password123!",hash2)}");
+Console.WriteLine("*********************************************");
+
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+});
 // --- 1. SERVICES (BUILDER SECTION) ---
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(EnrollStudentHandler).Assembly)
@@ -197,6 +214,7 @@ new BoundedChannelOptions(100)
 {
     FullMode = BoundedChannelFullMode.Wait
 }));
+builder.Services.AddProblemDetails();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<ITranscriptNotificationService, SignalRTranscriptNotificationService>();
 
@@ -208,10 +226,27 @@ policy.WithOrigins("http://localhost:4200")
 .AllowAnyMethod());
 });
 
+var allowedOrigins = builder.Configuration
+                         .GetSection("AllowedOrigins").Get<string[]>()
+                     ?? ["http://localhost:4200"];
+// Register the CORS policy in the Dependency Injection container
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("TmsClient", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials() // Vital for HttpOnly auth cook ies in Session 2
+            .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+    });
+});
+
 var app = builder.Build();
 
 // --- 2. MIDDLEWARE PIPELINE (ORDER MATTERS) ---
 
+app.UseStatusCodePages();
 // 1. Logging is the outer wrapper (Session 1B)
 app.MapHub<TmsHub>("/hubs/tms");
 app.UseMiddleware<RequestLoggingMiddleware>();
@@ -223,14 +258,32 @@ app.UseStatusCodePages(); //( Exercise 6 TODO 3) Turns 404s into JSON ProblemDet
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors("AllowAngular");
+
 app.UseRateLimiter();
 app.MapHealthChecks("/health/live").DisableRateLimiting();
 app.MapHealthChecks("/health/ready").DisableRateLimiting();
-
+app.UseCors("TmsClient");
 app.UseAuthentication();
 app.UseAuthorization();
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true || context.Request.Cookies.ContainsKey("tms_auth"))
+    {
+        var antiforgery = context.RequestServices
+            .GetRequiredService<IAntiforgery>();
+        var tokens = antiforgery.GetAndStoreTokens(context);
+        context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!,
+        new CookieOptions
+        {
+            HttpOnly = true, // MUST be false so Angular Jav aScript can read it!
+            Secure = !builder.Environment.IsDevelopment(),
+            SameSite = SameSiteMode.Strict
+        });
+    }
 
+    await next(context);
+});
+app.MapHub<TmsHub>("/hubs/tms").RequireCors("TmsClient");
 // 3. Environment Toggle (Exercise 7)
 if (app.Environment.IsDevelopment())
 {
