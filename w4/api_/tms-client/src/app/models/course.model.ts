@@ -3,11 +3,12 @@ export interface Course{
     code:string;
     title:string;
     Capacity:number;
-    enrollmentCount:number
+    enrollmentCount:number;
+    status?: string;
 }
 
 export interface PagedResponse<T>{
-    items: T[];
+    data: T[];
     totalCount:number;
     page:number;
     pageSize:number;
@@ -15,6 +16,7 @@ export interface PagedResponse<T>{
     hasPrevious:boolean;
     hasNext:boolean;
     }
+
 export interface CourseLink{
     href:string;
     rel:string;
