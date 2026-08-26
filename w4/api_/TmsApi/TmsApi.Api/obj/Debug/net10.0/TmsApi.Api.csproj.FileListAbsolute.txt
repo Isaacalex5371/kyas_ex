@@ -146,3 +146,4 @@ D:\isaac\educational purpose only\kyas\exerscise\w4\api_\TmsApi\TmsApi.Api\bin\D
 D:\isaac\educational purpose only\kyas\exerscise\w4\api_\TmsApi\TmsApi.Api\bin\Debug\net10.0\MediatR.Contracts.dll
 D:\isaac\educational purpose only\kyas\exerscise\w4\api_\TmsApi\TmsApi.Api\bin\Debug\net10.0\Microsoft.Extensions.Caching.Hybrid.dll
 D:\isaac\educational purpose only\kyas\exerscise\w4\api_\TmsApi\TmsApi.Api\bin\Debug\net10.0\BCrypt-Net-Next.dll
+D:\isaac\educational purpose only\kyas\exerscise\w4\api_\TmsApi\TmsApi.Api\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Threading.Channels;
 using System.Threading.RateLimiting;
 using Asp.Versioning;
@@ -5,9 +6,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using TmsApi.Api.ExceptionHandlers;
 using TmsApi.Api.Hubs;
@@ -19,6 +23,7 @@ using TmsApi.Application.Interfaces;
 using TmsApi.Application.Notifications;
 using TmsApi.Application.Trasnscripts;
 using TmsApi.Filters;
+using TmsApi.Infrastructure.Identity;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Infrastructure.Services;
 using TmsApi.Infrastructure.Transcripts;
@@ -37,7 +42,24 @@ Console.WriteLine($"Hash 2: {hash2}");
 Console.WriteLine($"Verify 1: {services.VerifyUserPassword("Password123!",hash1)}");
 Console.WriteLine($"Verify 2: {services.VerifyUserPassword("Password123!",hash2)}");
 Console.WriteLine("*********************************************");
+builder.Services.AddScoped<TokenService>();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(option =>
+{
+    option.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+    };
+});
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -183,6 +205,25 @@ builder.Services.AddDbContext<TmsDbContext>(options =>
         .LogTo(Console.WriteLine, LogLevel.Information) // Log SQLto output window
         .EnableSensitiveDataLogging()
 ); // Show parameters in querylogs (dev only)
+
+builder.Services.AddIdentityCore<TmsUser>(options =>
+    {
+        // Password Policy
+        options.Password.RequiredLength = 12;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireDigit = true;
+        options.Password.RequireNonAlphanumeric = true;
+
+        // Lockout Policy
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        options.Lockout.AllowedForNewUsers = true;
+    })
+    .AddRoles<IdentityRole>() // Allows you to have "Admin", "Instructor", etc.
+    .AddEntityFrameworkStores<TmsDbContext>(); // Connects Identity to your DB tables
+
+builder.Services.AddControllers();
+
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
