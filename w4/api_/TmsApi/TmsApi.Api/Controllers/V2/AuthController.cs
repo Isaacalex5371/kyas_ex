@@ -122,51 +122,6 @@ public class AuthController:ControllerBase
         });
 
     }
-    // [HttpPost("refresh")]
-    //     public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
-    // {
-    //     var storedToken = await _Context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken);
-    //     if (storedToken == null)
-    //     {
-    //         return Unauthorized(new { detail = "Invalid refresh token." });
-    //     }
-
-    //         if (storedToken.IsUsed)
-    //         {
-    //             var userTokens = await _Context.RefreshTokens.Where(rt => rt.UserId == storedToken.UserId).ToListAsync();
-    //             foreach (var t in userTokens)
-    //             {
-    //                 t.IsRevoked = true;
-    //             }
-    //             await _Context.SaveChangesAsync();
-    //             return Unauthorized(new { detail = "Token theft detected All user session revoked." });
-
-    //         }
-
-    //         if(storedToken.IsRevoked|| storedToken.ExpiresAt < DateTime.UtcNow)
-    //         {
-    //             storedToken.IsUsed = true;
-    //             var newRefreshToken = new RefreshToken
-    //             {
-    //                 Token = Guid.NewGuid().ToString("N"),
-    //                 UserId = storedToken.UserId,
-    //                 ExpiresAt = DateTime.UtcNow.AddDays(7),
-    //                 IsUsed = false,
-    //                 IsRevoked = false
-    //             };
-    //             _Context.RefreshTokens.Add(newRefreshToken);
-    //             await _Context.SaveChangesAsync();
-    //             var user = await _userManager.FindByIdAsync(storedToken.UserId);
-    //             var roles = await _userManager.GetRolesAsync(user!);
-    //             var newAccessToken = _tokenservice.GenerateJwt(user!, roles);
-    //             return Ok(new
-    //             {
-    //                 accessToken = newAccessToken,
-    //                 refreshToken = newRefreshToken.Token
-    //             });
-
-    //         }
-    //     }
 
     [HttpPost("refresh")]
 public async Task<IActionResult> Refresh([FromBody] RefreshRequest

@@ -7,12 +7,14 @@ using MediatR;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Tms.Api.Authorization;
 using TmsApi.Api.ExceptionHandlers;
 using TmsApi.Api.Hubs;
 using TmsApi.Api.Notifications;
@@ -29,6 +31,7 @@ using TmsApi.Infrastructure.Services;
 using TmsApi.Infrastructure.Transcripts;
 using TmsApi.Infrastructure.Workers;
 using TmsApi.Middleware;
+using TmsApi.TmsApi.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +47,11 @@ Console.WriteLine($"Verify 2: {services.VerifyUserPassword("Password123!",hash2)
 Console.WriteLine("*********************************************");
 builder.Services.AddScoped<TokenService>();
 
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("CanEditCourse", policy =>
+        policy.Requirements.Add(new CourseInstructorRequirement()));
+
+builder.Services.AddSingleton<IAuthorizationHandler, CourseInstructorHandler>();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
