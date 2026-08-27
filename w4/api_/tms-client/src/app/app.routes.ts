@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { EnrollmentList } from './features/enrollment-list/enrollment-list';
+import { roleGuard } from './guards/role-guard';
+import { StudentDashboardComponent } from './features/student-dashboard/student-dashboard.component';
+import { AdminCourseList } from './admin-course-list/admin-course-list';
 
 export const routes: Routes = [
   {
@@ -32,6 +35,7 @@ loadComponent: () => import('./features/enrollment-form/enrollment-form')
 .then(m => m.EnrollmentForm)
 },
 {path:'queue',
+  canActivate: [roleGuard('Admin')],
   loadComponent:()=>
     import('./features/enrollment-list/enrollment-list').then((m)=>EnrollmentList)
 },
@@ -40,5 +44,16 @@ path: 'grade-submission',
 loadComponent: () =>
 import('./features/grade-submission/grade-submission.component')
 .then(m => m.GradeSubmissionComponent)
+},
+{
+path: 'login',
+loadComponent: () =>
+import('./features/login/login.component')
+.then(m => m.LoginComponent)
+},
+{
+path: 'admin/courses',
+component: AdminCourseList,
+canActivate: [roleGuard('Admin')]
 }
 ];
