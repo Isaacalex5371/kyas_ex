@@ -6,4 +6,7 @@ public record CourseResponseDto(
     string Title,
     int Capacity,
     int EnrollmentCount
-);
+)
+{
+   
+}
