@@ -1,45 +1,324 @@
-<h2>Enrollment Records</h2>
-@if (store.isLoading()) {
-<p>Loading enrollments...</p>
-}
-@if (store.error()) {
-<p class="error">{{ store.error() }}</p>
-}
-<table mat-table [dataSource]="dataSource" matSort class="mat-elevation
--z8">
-<!-- Student Name Column -->
-<ng-container matColumnDef="studentName">
-<th mat-header-cell *matHeaderCellDef mat-sort-header>Student</th>
-<td mat-cell *matCellDef="let row">{{ row.studentName }}</td>
-</ng-container>
-<!-- Course Name Column -->
-<ng-container matColumnDef="courseName">
-<th mat-header-cell *matHeaderCellDef mat-sort-header>Course</th>
-<td mat-cell *matCellDef="let row">{{ row.courseName }}</td>
-</ng-container>
-<!-- Status Column -->
-<ng-container matColumnDef="status">
-<th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-<td mat-cell *matCellDef="let row">
-<span class="status-badge" [class]="row.status.toLowerCase()">
-{{ row.status }}
-</span>
-</td>
-</ng-container>
-<!-- Actions Column -->
-<ng-container matColumnDef="actions">
-<th mat-header-cell *matHeaderCellDef>Actions</th>
-<td mat-cell *matCellDef="let row">
-@if (row.status === 'Pending') {
-<button (click)="store.approveEnrollment(row.id)">Approve</button>
-}
-</td>
-</ng-container>
-<!-- Row definitions -->
-<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-<tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
-<mat-paginator
-[pageSizeOptions]="[10, 25, 50]"
-showFirstLastButtons>
-</mat-paginator>
+<div class="min-h-screen bg-slate-50">
+  <div class="mx-auto max-w-7xl px-6 py-10">
+    <!-- HEADER -->
+    <div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <div class="mb-3 flex items-center gap-2">
+          <span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+
+          <span class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">
+            Enrollment Management
+          </span>
+        </div>
+
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          Student Enrollments
+        </h1>
+
+        <p class="mt-2 text-sm text-slate-500">
+          Review and manage student course enrollment requests.
+        </p>
+      </div>
+
+      <!-- Pending COUNTER -->
+      <div
+        class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
+      >
+        <div
+          class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.8"
+            stroke="currentColor"
+            class="h-6 w-6"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+        </div>
+
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending</p>
+
+          <p class="text-2xl font-bold text-slate-900">
+            {{ store.PendingCount() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    @if (store.isLoading()) {
+      <div
+        class="mb-6 flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-12 shadow-sm"
+      >
+        <div class="flex items-center gap-3">
+          <svg
+            class="h-5 w-5 animate-spin text-indigo-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
+          </svg>
+
+          <span class="text-sm font-medium text-slate-500"> Loading enrollments... </span>
+        </div>
+      </div>
+    }
+
+    <!-- ERROR -->
+    @if (store.error()) {
+      <div
+        class="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700"
+      >
+        <div
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 font-bold text-rose-600"
+        >
+          !
+        </div>
+
+        <div>
+          <p class="font-semibold">Unable to load enrollments</p>
+
+          <p class="mt-1 text-sm">
+            {{ store.error() }}
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- TABLE CARD -->
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <!-- TABLE HEADER -->
+      <div
+        class="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <h2 class="font-bold text-slate-900">Enrollment Requests</h2>
+
+          <p class="mt-1 text-xs text-slate-500">
+            Review student applications and update their status.
+          </p>
+        </div>
+
+        <div class="rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
+          {{ store.PendingCount() }} Pending request(s)
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" matSort class="w-full">
+          <!-- STUDENT -->
+          <ng-container matColumnDef="studentName">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header
+              class="whitespace-nowrap bg-slate-50 px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500"
+            >
+              Student
+            </th>
+
+            <td mat-cell *matCellDef="let row" class="whitespace-nowrap px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-600"
+                >
+                  {{ row.studentName?.charAt(0)?.toUpperCase() }}
+                </div>
+
+                <div>
+                  <p class="font-semibold text-slate-900">
+                    {{ row.studentName }}
+                  </p>
+
+                  <p class="text-xs text-slate-400">Student</p>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- COURSE -->
+          <ng-container matColumnDef="courseName">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header
+              class="whitespace-nowrap bg-slate-50 px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500"
+            >
+              Course
+            </th>
+
+            <td mat-cell *matCellDef="let row" class="px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.8"
+                    stroke="currentColor"
+                    class="h-5 w-5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 6.75 19.5 10.5 12 14.25 4.5 10.5 12 6.75Z"
+                    />
+
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6.75 12.75v3.75c0 1.243 2.35 2.25 5.25 2.25s5.25-1.007 5.25-2.25v-3.75"
+                    />
+                  </svg>
+                </div>
+
+                <span class="font-medium text-slate-700">
+                  {{ row.courseName }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- STATUS -->
+          <ng-container matColumnDef="status">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header
+              class="whitespace-nowrap bg-slate-50 px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500"
+            >
+              Status
+            </th>
+
+            <td mat-cell *matCellDef="let row" class="px-6 py-5">
+              <span
+                class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold"
+                [class.bg-amber-50]="row.status === enrollmentStatus.Pending"
+                [class.text-amber-700]="row.status === enrollmentStatus.Pending"
+                [class.bg-emerald-50]="row.status === enrollmentStatus.Approved"
+                [class.text-emerald-700]="row.status === enrollmentStatus.Approved"
+                [class.bg-rose-50]="row.status === enrollmentStatus.Rejected"
+                [class.text-rose-700]="row.status === enrollmentStatus.Rejected"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full"
+                  [class.bg-amber-500]="row.status === enrollmentStatus.Pending"
+                  [class.bg-emerald-500]="row.status === enrollmentStatus.Approved"
+                  [class.bg-rose-500]="row.status === enrollmentStatus.Rejected"
+                ></span>
+
+                {{row.status}}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- ACTIONS -->
+          <ng-container matColumnDef="actions">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              class="whitespace-nowrap bg-slate-50 px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500"
+            >
+              Actions
+            </th>
+
+            <td mat-cell *matCellDef="let row" class="px-6 py-5">
+              @if (auth.hasRole('admin') || auth.hasRole('Instractor')) {
+                @if (row.status === enrollmentStatus.Pending) {
+                  <div class="flex items-center gap-2">
+                    <!-- APPROVE -->
+                    <button
+                      type="button"
+                      (click)="onApprove(row.id)"
+                      class="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="h-4 w-4"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+                      </svg>
+
+                      Approve
+                    </button>
+
+                    <!-- REJECT -->
+                    <button
+                      type="button"
+                      (click)="onReject(row.id)"
+                      class="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-600 hover:text-white"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="h-4 w-4"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 18 18 6M6 6l12 12"
+                        />
+                      </svg>
+
+                      Reject
+                    </button>
+                  </div>
+                } @else {
+                  <span class="text-xs font-medium text-slate-400"> No action required </span>
+                }
+              }
+            </td>
+          </ng-container>
+
+          <!-- HEADER ROW -->
+          <tr
+            mat-header-row
+            *matHeaderRowDef="displayedColumns"
+            class="border-b border-slate-200"
+          ></tr>
+
+          <!-- DATA ROW -->
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            class="border-b border-slate-100 transition last:border-0 hover:bg-slate-50"
+          ></tr>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="border-t border-slate-100 bg-white">
+        <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons> </mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

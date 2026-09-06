@@ -1,54 +1,402 @@
-<div class="max-w-md mx-auto my-8">
-<mat-card class="shadow-xl rounded-2xl bg-slate-900 border border-slate-800 text-slate-100 p-6">
-<mat-card-header class="mb-4">
-<mat-card-title class="text-xl font-bold text-slate-100">Grade Submission Form</mat-card-title>
-<mat-card-subtitle class="text-slate-400 text-sm">Instructor Midterm Grading</mat-card-subtitle>
-</mat-card-header>
-<form [formGroup]="gradeForm" (ngSubmit)="onSubmit()">
-<mat-card-content class="space-y-4">
-<mat-form-field appearance="outline" class="w-full">
-<mat-label>Student ID</mat-label>
-<input matInput type="number" formControlName="studentId" />
-@if (gradeForm.controls.studentId.hasError('required')) {
-<mat-error>Student ID is required</mat-error>
-}
-</mat-form-field>
-<mat-form-field appearance="outline" class="w-full">
-<mat-label>Course ID</mat-label>
-<input matInput type="number" formControlName="courseId" />
-@if (gradeForm.controls.courseId.hasError('required')) {
-<mat-error>Course ID is required</mat-error>
-}
-</mat-form-field>
-<mat-form-field appearance="outline" class="w-full">
-<mat-label>Score (0-100)</mat-label>
-<input matInput type="number" formControlName="score" />
-@if (gradeForm.controls.score.hasError('min') || gradeForm.controls.score.hasError('max')) {
-<mat-error>Score must be between 0 and 100</mat-error>
-}
-</mat-form-field>
-@if (isSubmitting) {
-<div class="flex justify-center py-3">
-<mat-spinner diameter="32"></mat-spinner>
-</div>
-}
-@if (submissionStatus) {
-<div class="mt-4 p-3 rounded-lg bg-slate-800 text-sky-400 tex
-t-sm font-medium border border-slate-700">
-{{ submissionStatus }}
-</div>
-}
-</mat-card-content>
-<mat-card-actions class="mt-4">
-<button
-mat-raised-button
-color="primary"
-type="submit"
-[disabled]="gradeForm.invalid || isSubmitting"
-class="w-full py-3 text-base font-semibold">
-Submit Final Grade
-</button>
-</mat-card-actions>
-</form>
-</mat-card>
+<div class="min-h-screen bg-slate-50 px-6 py-10">
+
+  <div class="mx-auto max-w-4xl">
+
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+
+      <div class="mb-3 flex items-center gap-2">
+        <span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+
+        <span class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">
+          Instructor Portal
+        </span>
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+        Grade Submission
+      </h1>
+
+      <p class="mt-2 text-sm text-slate-500">
+        Submit and record a student's final course grade.
+      </p>
+
+    </div>
+
+
+    <!-- MAIN GRID -->
+    <div class="grid gap-6 lg:grid-cols-[1fr_280px]">
+
+
+      <!-- FORM -->
+      <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
+        <!-- FORM HEADER -->
+        <div class="border-b border-slate-100 px-7 py-6">
+
+          <div class="flex items-center gap-4">
+
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.8"
+                stroke="currentColor"
+                class="h-6 w-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12.75 11.25 15 15 9.75"
+                />
+
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">
+                Final Grade
+              </h2>
+
+              <p class="mt-1 text-xs text-slate-500">
+                Midterm / final assessment submission
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <form
+          [formGroup]="gradeForm"
+          (ngSubmit)="onSubmit()"
+        >
+
+          <div class="space-y-6 p-7">
+
+
+            <!-- STUDENT ID -->
+            <mat-form-field
+              appearance="outline"
+              class="w-full"
+            >
+
+              <mat-label>
+                Student ID
+              </mat-label>
+
+              <input
+                matInput
+                type="number"
+                formControlName="studentId"
+              />
+
+              @if (gradeForm.controls.studentId.hasError('required')) {
+
+                <mat-error>
+                  Student ID is required
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- COURSE ID -->
+            <mat-form-field
+              appearance="outline"
+              class="w-full"
+            >
+
+              <mat-label>
+                Course ID
+              </mat-label>
+
+              <input
+                matInput
+                type="number"
+                formControlName="courseId"
+              />
+
+              @if (gradeForm.controls.courseId.hasError('required')) {
+
+                <mat-error>
+                  Course ID is required
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- SCORE -->
+            <mat-form-field
+              appearance="outline"
+              class="w-full"
+            >
+
+              <mat-label>
+                Score
+              </mat-label>
+
+              <input
+                matInput
+                type="number"
+                formControlName="score"
+                min="0"
+                max="100"
+              />
+
+              <mat-hint>
+                Enter a score between 0 and 100
+              </mat-hint>
+
+              @if (
+                gradeForm.controls.score.hasError('min') ||
+                gradeForm.controls.score.hasError('max')
+              ) {
+
+                <mat-error>
+                  Score must be between 0 and 100
+                </mat-error>
+
+              }
+
+            </mat-form-field>
+
+
+            <!-- SUBMITTING -->
+            @if (isSubmitting) {
+
+              <div
+                class="flex items-center justify-center gap-3 rounded-xl bg-slate-50 py-4"
+              >
+
+                <mat-spinner
+                  diameter="28"
+                ></mat-spinner>
+
+                <span class="text-sm font-medium text-slate-500">
+                  Submitting grade...
+                </span>
+
+              </div>
+
+            }
+
+
+            <!-- STATUS -->
+            @if (submissionStatus) {
+
+              <div
+                class="flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4"
+              >
+
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-600"
+                >
+                  ✓
+                </div>
+
+                <div>
+
+                  <p class="text-sm font-semibold text-indigo-900">
+                    Submission Status
+                  </p>
+
+                  <p class="mt-1 text-sm text-indigo-700">
+                    {{ submissionStatus }}
+                  </p>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- FOOTER -->
+          <div
+            class="border-t border-slate-100 bg-slate-50/70 px-7 py-5"
+          >
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="gradeForm.invalid || isSubmitting"
+              class="w-full !rounded-xl !py-3 !text-sm !font-bold sm:w-auto sm:min-w-48"
+            >
+
+              @if (isSubmitting) {
+
+                Submitting...
+
+              } @else {
+
+                Submit Final Grade
+
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+
+      <!-- RIGHT INFO PANEL -->
+      <aside class="space-y-5">
+
+
+        <!-- GRADING INFO -->
+        <div class="rounded-3xl bg-slate-900 p-6 text-white shadow-sm">
+
+          <div
+            class="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.8"
+              stroke="currentColor"
+              class="h-6 w-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6.75 19.5 10.5 12 14.25 4.5 10.5 12 6.75Z"
+              />
+
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6.75 12.75v3.75c0 1.243 2.35 2.25 5.25 2.25s5.25-1.007 5.25-2.25v-3.75"
+              />
+            </svg>
+          </div>
+
+          <h3 class="text-lg font-bold">
+            Grading Guide
+          </h3>
+
+          <p class="mt-2 text-sm leading-6 text-slate-400">
+            Make sure the student and course information is correct before submitting.
+          </p>
+
+
+          <div class="mt-6 space-y-4">
+
+            <div class="flex items-center justify-between">
+
+              <span class="text-sm text-slate-400">
+                Score range
+              </span>
+
+              <span class="font-semibold text-white">
+                0 – 100
+              </span>
+
+            </div>
+
+            <div class="h-px bg-white/10"></div>
+
+            <div class="flex items-center justify-between">
+
+              <span class="text-sm text-slate-400">
+                Assessment
+              </span>
+
+              <span class="font-semibold text-white">
+                Midterm
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- WARNING -->
+        <div class="rounded-3xl border border-amber-200 bg-amber-50 p-5">
+
+          <div class="flex gap-3">
+
+            <div
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-600"
+            >
+              !
+            </div>
+
+            <div>
+
+              <h3 class="text-sm font-bold text-amber-900">
+                Check before submitting
+              </h3>
+
+              <p class="mt-1 text-xs leading-5 text-amber-700">
+                Verify the Student ID, Course ID, and score carefully.
+                Submitted grades may affect the student's academic record.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- SCORE SCALE -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-5">
+
+          <h3 class="text-sm font-bold text-slate-900">
+            Score Scale
+          </h3>
+
+          <div class="mt-4 space-y-3">
+
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-500">Excellent</span>
+              <span class="font-semibold text-slate-700">90 – 100</span>
+            </div>
+
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-500">Good</span>
+              <span class="font-semibold text-slate-700">70 – 89</span>
+            </div>
+
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-500">Pass</span>
+              <span class="font-semibold text-slate-700">50 – 69</span>
+            </div>
+
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-500">Fail</span>
+              <span class="font-semibold text-slate-700">0 – 49</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </div>
 </div>
