@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
+
+namespace TmsApi.Api;
 
 public class RequestLoggingMiddleware
 {

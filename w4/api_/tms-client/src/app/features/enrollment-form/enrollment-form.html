@@ -1,158 +1,463 @@
-<div class="min-h-screen bg-slate-100 py-10 px-6">
-  <div class="mx-auto max-w-3xl">
+<div class="min-h-screen bg-slate-50 px-6 py-10">
 
-    <div class="mb-8">
-      <h2 class="text-4xl font-bold text-slate-800">
-         Course Enrollment
-      </h2>
-      <p class="mt-2 text-slate-500">
-        Fill out the form below to enroll in your desired course.
-      </p>
+  <div class="mx-auto max-w-6xl">
+
+    <!-- PAGE HEADER -->
+    <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
+      <div>
+        <div class="mb-2 flex items-center gap-2 text-sm font-semibold text-indigo-600">
+          <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
+          Student Portal
+        </div>
+
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+          Course Enrollment
+        </h1>
+
+        <p class="mt-2 max-w-xl text-sm text-slate-500">
+          Complete the enrollment form to register for your selected course.
+        </p>
+      </div>
+
+      <div
+        class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm"
+      >
+        Enrollment Form
+      </div>
+
     </div>
+
 
     @if (submitted()) {
 
-    <div
-      class="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 shadow-sm">
-      Enrollment submitted. Check the console for the payload.
-    </div>
+      <!-- SUCCESS STATE -->
+      <div class="overflow-hidden rounded-3xl border border-emerald-200 bg-white shadow-sm">
 
-    } @else {
+        <div class="flex flex-col items-center px-6 py-16 text-center">
 
-    <form
-      [formGroup]="form"
-      (ngSubmit)="submit()"
-      class="space-y-6 rounded-2xl bg-white p-8 shadow-lg">
+          <div
+            class="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              class="h-10 w-10"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m4.5 12.75 6 6 9-13.5"
+              />
+            </svg>
+          </div>
 
-      <!-- Student ID -->
-      <div>
-        <label
-          for="studentId"
-          class="mb-2 block text-sm font-semibold text-slate-700">
-          Student ID
-        </label>
+          <h2 class="mt-6 text-2xl font-bold text-slate-900">
+            Enrollment Submitted
+          </h2>
 
-        <input
-          id="studentId"
-          formControlName="studentId"
-          placeholder="e.g. STU-1234"
-          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-
-        @if (form.controls.studentId.touched &&
-        form.controls.studentId.invalid) {
-
-        <p class="mt-2 text-sm font-medium text-red-500">
-          Enter a valid Student ID (format: STU-0000)
-        </p>
-
-        }
-      </div>
-
-      <!-- Course ID -->
-      <div>
-        <label
-          for="courseId"
-          class="mb-2 block text-sm font-semibold text-slate-700">
-          Course ID
-        </label>
-
-        <input
-          id="courseId"
-          formControlName="courseId"
-          placeholder="e.g. 1 (TMS course primary key)"
-          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-
-        @if (form.controls.courseId.touched &&
-        form.controls.courseId.invalid) {
-
-        <p class="mt-2 text-sm font-medium text-red-500">
-          Course ID is required.
-        </p>
-
-        }
-      </div>
-
-      <!-- Term -->
-      <div>
-        <label
-          for="term"
-          class="mb-2 block text-sm font-semibold text-slate-700">
-          Term
-        </label>
-
-        <input
-          id="term"
-          formControlName="term"
-          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-      </div>
-
-      <!-- Notes -->
-      <div>
-        <label
-          for="notes"
-          class="mb-2 block text-sm font-semibold text-slate-700">
-          Notes (Optional)
-        </label>
-
-        <textarea
-          id="notes"
-          formControlName="notes"
-          rows="4"
-          class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"></textarea>
-      </div>
-
-      <!-- Backup Courses -->
-      <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
-
-        <h3 class="mb-5 text-xl font-bold text-slate-800">
-          Backup Courses
-        </h3>
-
-        @for (backup of backups.controls; track $index) {
-
-        <div class="mb-4 flex gap-3">
-
-          <input
-            [formControl]="backup"
-            [placeholder]="'Backup course ' + ($index + 1)"
-            class="flex-1 rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-
-          <button
-            type="button"
-            (click)="removeBackup($index)"
-            class="rounded-xl bg-red-500 px-4 text-white transition hover:bg-red-600">
-            Remove
-          </button>
+          <p class="mt-2 max-w-md text-sm leading-6 text-slate-500">
+            Your enrollment request has been successfully submitted.
+            Check the console for the submitted payload.
+          </p>
 
         </div>
 
-        }
-
-        <button
-          type="button"
-          (click)="addBackup()"
-          class="rounded-xl bg-slate-800 px-5 py-3 font-medium text-white transition hover:bg-slate-900">
-          + Add Backup Course
-        </button>
-
       </div>
 
-      <div class="border-t pt-6">
+    } @else {
 
-        <button
-          type="submit"
-          [disabled]="form.invalid"
-          class="w-full rounded-xl bg-indigo-600 py-4 text-lg font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">
+      <!-- MAIN CONTENT -->
+      <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
 
-          Confirm Enrollment
+        <!-- FORM CARD -->
+        <form
+          [formGroup]="form"
+          (ngSubmit)="submit()"
+          class="rounded-3xl border border-slate-200 bg-white shadow-sm"
+        >
 
-        </button>
+          <!-- FORM HEADER -->
+          <div class="border-b border-slate-100 px-7 py-6">
+
+            <div class="flex items-center gap-4">
+
+              <div
+                class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.8"
+                  stroke="currentColor"
+                  class="h-6 w-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6.75 19.5 10.5 12 14.25 4.5 10.5 12 6.75Z"
+                  />
+
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6.75 12.75v3.75c0 1.243 2.35 2.25 5.25 2.25s5.25-1.007 5.25-2.25v-3.75"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <h2 class="font-bold text-slate-900">
+                  Enrollment Details
+                </h2>
+
+                <p class="mt-1 text-xs text-slate-500">
+                  Enter your information below
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- FORM BODY -->
+          <div class="space-y-6 p-7">
+
+            <!-- STUDENT ID -->
+            <div>
+
+              <label
+                for="studentId"
+                class="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Student ID
+              </label>
+
+              <input
+                id="studentId"
+                formControlName="studentId"
+                placeholder="STU-1234"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              />
+
+              @if (
+                form.controls.studentId.touched &&
+                form.controls.studentId.invalid
+              ) {
+
+                <p class="mt-2 text-xs font-medium text-rose-600">
+                  Enter a valid Student ID (format: STU-0000)
+                </p>
+
+              }
+
+            </div>
+
+
+            <!-- COURSE ID -->
+            <div>
+
+              <label
+                for="courseId"
+                class="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Course ID
+              </label>
+
+              <input
+                id="courseId"
+                formControlName="courseId"
+                placeholder="1"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              />
+
+              @if (
+                form.controls.courseId.touched &&
+                form.controls.courseId.invalid
+              ) {
+
+                <p class="mt-2 text-xs font-medium text-rose-600">
+                  Course ID is required.
+                </p>
+
+              }
+
+            </div>
+
+
+            <!-- TERM -->
+            <div>
+
+              <label
+                for="term"
+                class="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Academic Term
+              </label>
+
+              <input
+                id="term"
+                formControlName="term"
+                placeholder="e.g. Fall 2026"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              />
+
+            </div>
+
+
+            <!-- NOTES -->
+            <div>
+
+              <div class="mb-2 flex items-center justify-between">
+
+                <label
+                  for="notes"
+                  class="text-sm font-semibold text-slate-700"
+                >
+                  Notes
+                </label>
+
+                <span class="text-xs text-slate-400">
+                  Optional
+                </span>
+
+              </div>
+
+              <textarea
+                id="notes"
+                formControlName="notes"
+                rows="4"
+                placeholder="Add any additional information..."
+                class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              ></textarea>
+
+            </div>
+
+
+            <!-- BACKUP COURSES -->
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+
+              <div class="mb-5 flex items-start justify-between">
+
+                <div>
+
+                  <h3 class="font-bold text-slate-900">
+                    Backup Courses
+                  </h3>
+
+                  <p class="mt-1 text-xs text-slate-500">
+                    Add alternative courses in case your first choice is unavailable.
+                  </p>
+
+                </div>
+
+                <span
+                  class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-sm"
+                >
+                  Optional
+                </span>
+
+              </div>
+
+
+              @for (backup of backups.controls; track $index) {
+
+                <div class="mb-3 flex gap-3">
+
+                  <div class="relative flex-1">
+
+                    <span
+                      class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400"
+                    >
+                      {{ $index + 1 }}
+                    </span>
+
+                    <input
+                      [formControl]="backup"
+                      [placeholder]="'Backup course ' + ($index + 1)"
+                      class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    />
+
+                  </div>
+
+                  <button
+                    type="button"
+                    (click)="removeBackup($index)"
+                    class="rounded-xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+                  >
+                    Remove
+                  </button>
+
+                </div>
+
+              }
+
+
+              <button
+                type="button"
+                (click)="addBackup()"
+                class="mt-2 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600"
+              >
+                <span class="text-lg leading-none">+</span>
+                Add Backup Course
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- FORM FOOTER -->
+          <div class="flex flex-col-reverse gap-3 border-t border-slate-100 px-7 py-5 sm:flex-row sm:justify-end">
+
+            <button
+              type="button"
+              routerLink="/dashboard"
+              class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              [disabled]="form.invalid"
+              class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+            >
+              Confirm Enrollment
+            </button>
+
+          </div>
+
+        </form>
+
+
+        <!-- RIGHT SIDE -->
+        <aside class="space-y-6">
+
+          <!-- SUMMARY -->
+          <div class="rounded-3xl bg-slate-900 p-6 text-white shadow-sm">
+
+            <div
+              class="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.8"
+                stroke="currentColor"
+                class="h-6 w-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12.75 11.25 15 15 9.75"
+                />
+
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"
+                />
+              </svg>
+            </div>
+
+            <h3 class="text-lg font-bold">
+              Before you submit
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-400">
+              Make sure your enrollment information is correct before confirming.
+            </p>
+
+
+            <div class="mt-6 space-y-4">
+
+              <div class="flex gap-3">
+
+                <span
+                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold"
+                >
+                  1
+                </span>
+
+                <p class="text-sm text-slate-300">
+                  Verify your Student ID.
+                </p>
+
+              </div>
+
+              <div class="flex gap-3">
+
+                <span
+                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold"
+                >
+                  2
+                </span>
+
+                <p class="text-sm text-slate-300">
+                  Enter the correct Course ID.
+                </p>
+
+              </div>
+
+              <div class="flex gap-3">
+
+                <span
+                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold"
+                >
+                  3
+                </span>
+
+                <p class="text-sm text-slate-300">
+                  Add backup courses if needed.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- HELP CARD -->
+          <div class="rounded-3xl border border-slate-200 bg-white p-6">
+
+            <div class="flex items-start gap-3">
+
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"
+              >
+                ?
+              </div>
+
+              <div>
+
+                <h3 class="font-bold text-slate-900">
+                  Need help?
+                </h3>
+
+                <p class="mt-1 text-sm leading-6 text-slate-500">
+                  Make sure the course ID matches an available course before submitting.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </aside>
 
       </div>
-
-    </form>
 
     }
 
   </div>
+
 </div>

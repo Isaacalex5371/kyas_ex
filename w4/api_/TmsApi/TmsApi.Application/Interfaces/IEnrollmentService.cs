@@ -20,7 +20,12 @@ public interface IEnrollmentService
 Task AddAsync(Enrollment enrollment, CancellationToken ct);
 
 Task<IEnumerable<Enrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct);
-
+Task<EnrollmentDetailDto> UpdateEnrollmentStatus(
+    int id,
+    string status,
+    CancellationToken ct
+);
 Task<IEnumerable<EnrollmentQueueResponseDto>> GetEnrollmentQueueAsync(CancellationToken ct);
     Task<bool> ApproveEnrollmentAsync(int id, CancellationToken ct);
+    Task<EnrollmentDetailDto> GetEnrollmentById(int id, CancellationToken ct);
 }

@@ -4,7 +4,7 @@ import { withEntities, setAllEntities, updateEntity } from '@ngrx/signals/entiti
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, concatMap, tap, catchError, EMPTY, switchMap } from 'rxjs';
 import { EnrollmentService } from '../services/enrollment.service';
-import { Enrollment } from '../models/enrollment.model';
+import { Enrollment, EnrollmentStatus } from '../models/enrollment.model';
 import { LiveSyncService } from '../services/live-sync.service';
 export const EnrollmentStore = signalStore(
   { providedIn: 'root' },
@@ -14,7 +14,11 @@ export const EnrollmentStore = signalStore(
   withEntities<Enrollment>(),
 
   withComputed((store) => ({
-    pendingCount: computed(() => store.entities().filter((e) => e.status === 'Pending').length),
+    PendingCount: computed(() =>
+  store.entities().filter(
+    e => e.status === EnrollmentStatus.Pending
+  ).length
+),
   })),
   withMethods((store, api = inject(EnrollmentService), sync = inject(LiveSyncService)) => ({
     listenForLiveUpdates: rxMethod<void>(
@@ -22,35 +26,50 @@ export const EnrollmentStore = signalStore(
         tap(() => sync.connect()),
         switchMap(() => sync.events$),
         tap((event) => {
-          patchState(store, updateEntity({ id: event.id, changes: { status: event.status } }));
+          let mappedStatus: EnrollmentStatus;
+          if (event.status === 'Approved') {
+            mappedStatus = EnrollmentStatus.Approved;
+          } else if (event.status === 'Rejected') {
+            mappedStatus = EnrollmentStatus.Rejected;
+          } else {
+            mappedStatus = EnrollmentStatus.Pending;
+          }
+          patchState(store, updateEntity({ id: event.id, changes: { status: mappedStatus } }));
         }),
       ),
     ),
-    loadEnrollments: rxMethod<void>(
+     loadEnrolments: rxMethod<void>(
       pipe(
         tap(() => patchState(store, { isLoading: true, error: null })),
         concatMap(() =>
-          api.getAll().pipe(
-            tap((rows) => patchState(store, setAllEntities(rows), { isLoading: false })),
+          api.getEnrollments().pipe(
+            tap((response) =>
+              patchState(store, setAllEntities(response.items), { isLoading: false }),
+            ),
             catchError((err) => {
               patchState(store, { isLoading: false, error: err.message });
-              return EMPTY;
+              return EMPTY; 
             }),
           ),
         ),
       ),
     ),
-    approveEnrollment: rxMethod<string>(
+     approveEnrollment: rxMethod<{ id: number; status: EnrollmentStatus }>(
       pipe(
-        tap((id) => {
-          patchState(store, updateEntity({ id, changes: { status: 'Approved' } }));
-        }),
-        concatMap((id) =>
-          api.approve(id).pipe(
+        concatMap(({ id, status }) =>
+          api.approve(id, status).pipe(
+            tap((updatedEnrollment) => {
+              patchState(
+                store,
+                updateEntity({
+                  id: updatedEnrollment.id,
+                  changes: updatedEnrollment,
+                }),
+              );
+            }),
             catchError((err) => {
-              patchState(store, updateEntity({ id, changes: { status: 'Pending' } }));
               patchState(store, {
-                error: 'Server rejected the approval.Check enrollment constraints.',
+                error: err.message,
               });
               return EMPTY;
             }),

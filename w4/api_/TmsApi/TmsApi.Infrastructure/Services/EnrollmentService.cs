@@ -151,6 +151,38 @@ public async Task<IEnumerable<Enrollment>> GetByStudentIdAsync(int studentId, Ca
         await _context.SaveChangesAsync(ct);
         return true;
     }
+
+    public async Task<EnrollmentDetailDto> UpdateEnrollmentStatus(
+        int id,
+        string status,
+        CancellationToken ct
+    )
+    {
+        var enrollment = await _context.Enrollments.FirstOrDefaultAsync(e => e.Id == id, ct);
+        if (enrollment is null)
+            throw new("Enrollment not found.");
+        enrollment.Status = status;
+        await _context.SaveChangesAsync(ct);
+        return await GetEnrollmentById(id, ct);
+    }
+
+    public async Task<EnrollmentDetailDto> GetEnrollmentById(int id, CancellationToken ct)
+    {
+       return await _context
+                  .Enrollments.AsNoTracking()
+                  .Where(e => e.Id == id)
+                  .Select(e => new EnrollmentDetailDto(
+                      e.Id,
+                      e.StudentId,
+                      e.Student.Name,
+                      e.CourseId,
+                      e.Course.Title,
+                      e.Status,
+                      e.EnrolledAt
+                  ))
+                  .FirstOrDefaultAsync(ct)
+              ?? throw new Exception($"Enrollment with id {id} was not found.");
+    }
 }
 
 public class TmsDatabaseException(string message) : Exception(message);

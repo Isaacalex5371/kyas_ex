@@ -1,0 +1,28 @@
+<div class="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-6 text-center">
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl border border-slate-200">
+    <!-- 403 Forbidden Icon -->
+    
+
+    <h1 class="text-5xl font-extrabold text-slate-900 mb-2">403</h1>
+    <h2 class="text-xl font-bold text-slate-800 mb-2">Access Forbidden</h2>
+
+    <p class="text-sm text-slate-500 mb-6">
+      You are currently logged in as
+      <span class="font-semibold text-indigo-600">{{
+        auth.currentUser()?.displayName || 'User'
+      }}</span>
+      (<span class="font-semibold text-slate-700">{{ auth.currentUser()?.role || 'No Role' }}</span
+      >), but you do not have permission to view this page.
+    </p>
+
+    <div class="flex flex-col gap-3">
+      
+      <button
+        (click)="auth.logOut()"
+        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+      >
+        Sign Out & Switch Account
+      </button>
+    </div>
+  </div>
+</div>
