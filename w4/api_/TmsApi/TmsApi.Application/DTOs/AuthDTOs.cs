@@ -1,6 +1,6 @@
-namespace Tms.Api.Dtos;
+namespace TmsApi.Application.DTOs;
 
-public class AuthDTOs
+public class AuthDtOs
 {
 public record RegisterRequest(
     string Email,
@@ -12,6 +12,7 @@ public record RegisterRequest(
 public record LoginRequest(
     string Email,
     string Password);
+public record LoginRequest2(string Email, string Password);
 public record RefreshRequest(string RefreshToken);
-public record UserProfileDto(string DisplayName, string Role);
+public record UserProfileDto(string Id, string Email, string FullName, string Role);
 }

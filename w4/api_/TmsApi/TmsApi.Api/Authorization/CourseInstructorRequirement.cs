@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace TmsApi.TmsApi.Api;
+namespace TmsApi.Api.Authorization;
 
 public class CourseInstructorRequirement : IAuthorizationRequirement
 {

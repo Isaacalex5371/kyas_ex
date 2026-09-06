@@ -1,13 +1,18 @@
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TmsApi.Application.Enrollments.Commands;
-using TmsApi.Application.Enrollments.Queries;
-using TmsApi.Application.Interfaces; // For IEnrollmentService
-using TmsApi.Application.DTOs;
 using Microsoft.AspNetCore.SignalR;
 using TmsApi.Api.Hubs;
-using TmsApi.Application.Hubs;      // For EnrollmentQueueResponseDto
+using TmsApi.Application.DTOs;
+using TmsApi.Application.Enrollments.Commands;
+using TmsApi.Application.Enrollments.Queries;
+using TmsApi.Application.Hubs;
+using TmsApi.Application.Interfaces;
+// For IEnrollmentService
+
+// For EnrollmentQueueResponseDto
+
+namespace TmsApi.Api.Controllers.V2;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/enrollments")]
@@ -18,6 +23,9 @@ using TmsApi.Application.Hubs;      // For EnrollmentQueueResponseDto
 public class EnrollmentsController(IMediator mediator, IEnrollmentService enrollmentService ,IHubContext<TmsHub,
     ITmsHubClient> hubContext) : ControllerBase
 {
+    private readonly IEnrollmentService _enrollmentService = enrollmentService;
+
+
     [HttpPost]
     [ProducesResponseType(typeof(EnrollmentCreated), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -65,39 +73,69 @@ public class EnrollmentsController(IMediator mediator, IEnrollmentService enroll
 
     // GET /api/v2/enrollments
     [HttpGet]
-    [ProducesResponseType(typeof(System.Collections.Generic.IEnumerable<EnrollmentQueueResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<EnrollmentQueueResponseDto>), StatusCodes.Status200OK)]
     [EndpointSummary("Get all enrollment requests (V2 Queue)")]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    // public async Task<IActionResult> GetAll(CancellationToken ct)
+    // {
+    //     // Go through the service layer to retrieve the data
+    //     var list = await enrollmentService.GetEnrollmentQueueAsync(ct);
+    //     return Ok(list);
+    // }
+    public async Task<IActionResult> GetAll([FromQuery]PagedRequest request ,CancellationToken ct)
     {
         // Go through the service layer to retrieve the data
-        var list = await enrollmentService.GetEnrollmentQueueAsync(ct);
-        return Ok(list);
+        var list= await enrollmentService.GetEnrollmentQueueAsync(ct);
+        var res = new PagedResponse<EnrollmentQueueResponseDto>
+        {
+            Items = (IReadOnlyList<EnrollmentQueueResponseDto>)list,
+            TotalCount = 0,
+            Page = request.Page,
+            PageSize = request.PageSize
+        };
+
+        return Ok(res);
     }
+    
 
     // POST /api/v2/enrollments/{id}/approve
-    [HttpPost("{id}/approve")]
+    [IgnoreAntiforgeryToken]
+    [HttpPost("{id:int}/approve")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Approve an enrollment request (V2 Queue)")]
-    public async Task<IActionResult> Approve(string id, CancellationToken ct)
+    public async Task<IActionResult> Approve(int id, CancellationToken ct)
     {
-        if (!int.TryParse(id, out var intId))
-        {
-            return BadRequest("Invalid ID format");
-        }
+        var success = await enrollmentService.ApproveEnrollmentAsync(id, ct);
 
-        // Call the service layer to execute the database modification
-        var success = await enrollmentService.ApproveEnrollmentAsync(intId, ct);
         if (!success)
         {
             return NotFound();
         }
-await hubContext.Clients.All
-    .ReceiveEnrollmentStatusUpdated(id, "Approved");
+
+        await hubContext.Clients.All
+            .ReceiveEnrollmentStatusUpdated(id, "Approved");
+
         return NoContent();
     }
 
+    [IgnoreAntiforgeryToken]
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> UpdateEnrollmentStatus(
+        int id,
+        [FromBody] UpdateEnrollmentStatusRequest request,
+        CancellationToken ct)
+    {
+        Console.WriteLine("🔥 CONTROLLER REACHED");
+        Console.WriteLine($"🔥 ID: {id}");
+        Console.WriteLine($"🔥 STATUS: {request.Status}");
+
+        return Ok(new
+        {
+            id,
+            status = request.Status
+        });
+    }
 
 
 }

@@ -86,6 +86,10 @@
               "target": "Package",
               "version": "[10.8.0, )"
             },
+            "Microsoft.OpenApi": {
+              "target": "Package",
+              "version": "[2.0.0, )"
+            },
             "Scalar.AspNetCore": {
               "target": "Package",
               "version": "[2.16.2, )"

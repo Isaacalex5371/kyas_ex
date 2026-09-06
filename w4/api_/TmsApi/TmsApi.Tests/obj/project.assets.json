@@ -1670,6 +1670,7 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.8",
           "Microsoft.AspNetCore.OpenApi": "10.0.9",
           "Microsoft.Extensions.Caching.Hybrid": "10.8.0",
+          "Microsoft.OpenApi": "2.0.0",
           "Scalar.AspNetCore": "2.16.2",
           "TmsApi.Application": "1.0.0",
           "TmsApi.Infrastructure": "1.0.0"

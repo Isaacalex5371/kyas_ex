@@ -1,7 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Dtos;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;
 

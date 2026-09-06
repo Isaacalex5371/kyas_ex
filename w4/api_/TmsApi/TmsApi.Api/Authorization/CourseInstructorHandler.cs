@@ -1,9 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using TmsApi.Domain.Entities;
-using TmsApi.TmsApi.Api;
 
-namespace Tms.Api.Authorization;
+namespace TmsApi.Api.Authorization;
 
 public class CourseInstructorHandler
     : AuthorizationHandler<CourseInstructorRequirement, Course>
